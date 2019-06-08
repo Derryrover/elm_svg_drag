@@ -15,17 +15,7 @@ import UuidGenerator
 
 import SvgTag
 import SvgPolygon
-
-
-
-type alias Model = 
-  { svgPolygonModel : SvgPolygon.Model 
-  , uuidGeneratorModel : UuidGenerator.Model
-  }
-
-type Msg 
-  = SvgPolygonMsg SvgPolygon.Msg
-  | UuidGeneratorMsg UuidGenerator.Msg
+import MsgRouter exposing(Msg(..), Model)
 
 main = Browser.element
   { init = init
@@ -52,16 +42,26 @@ view model =
   div 
     []
     [ 
-      SvgTag.tag [ SvgPolygon.view model.svgPolygonModel ]
+      SvgTag.tag [ Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel) ]
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model = 
+update preMsg model =
+  let 
+    (maybeModel ,msg) = MsgRouter.reconstructMainMsg preMsg model
+    newUuidModel = 
+      case maybeModel.uuidGeneratorModel of 
+        Nothing ->
+          model.uuidGeneratorModel
+        Just uuidGeneratorModel ->
+          uuidGeneratorModel
+  in
   case msg of
     SvgPolygonMsg svgPolygonMsg ->
       let (svgPolygonModel, svgPolygonCommand) = SvgPolygon.update svgPolygonMsg model.svgPolygonModel
       in 
-        ( { model | svgPolygonModel = svgPolygonModel }, Cmd.map SvgPolygonMsg svgPolygonCommand)
+        ( { model | svgPolygonModel = svgPolygonModel 
+                  , uuidGeneratorModel= newUuidModel}, Cmd.map SvgPolygonMsg svgPolygonCommand)
     UuidGeneratorMsg uuidGeneratorMsg ->
       let (uuidGeneratorModel, uuidGeneratorCommand) = UuidGenerator.update uuidGeneratorMsg model.uuidGeneratorModel
       in ( { model | uuidGeneratorModel = uuidGeneratorModel }, Cmd.map UuidGeneratorMsg uuidGeneratorCommand)
