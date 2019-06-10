@@ -4985,6 +4985,9 @@ var author$project$MsgToCmd$send = function (msg) {
 		elm$core$Basics$identity,
 		elm$core$Task$succeed(msg));
 };
+var author$project$SvgDragModel$One = {$: 'One'};
+var author$project$SvgDragModel$Three = {$: 'Three'};
+var author$project$SvgDragModel$Two = {$: 'Two'};
 var author$project$SvgPolygon$Uuid = function (a) {
 	return {$: 'Uuid', a: a};
 };
@@ -4994,9 +4997,19 @@ var elm$core$Basics$negate = function (n) {
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var author$project$SvgPolygon$init = _Utils_Tuple2(
 	{
-		one: {x: -50, y: -50},
-		three: {x: 0, y: 50},
-		two: {x: 50, y: -50},
+		drag: elm$core$Maybe$Nothing,
+		one: {
+			w: author$project$SvgDragModel$One,
+			xy: {x: -50, y: -50.0}
+		},
+		three: {
+			w: author$project$SvgDragModel$Three,
+			xy: {x: 0.0, y: 50.0}
+		},
+		two: {
+			w: author$project$SvgDragModel$Two,
+			xy: {x: 50.0, y: -50.0}
+		},
 		uuid: elm$core$Maybe$Nothing
 	},
 	elm$core$Platform$Cmd$batch(
@@ -5520,22 +5533,34 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 	});
 var author$project$SvgPolygon$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'None') {
-			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-		} else {
-			var maybeUuid = msg.a;
-			if (maybeUuid.$ === 'Nothing') {
+		switch (msg.$) {
+			case 'None':
 				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			} else {
-				var uuid = maybeUuid.a;
+			case 'Uuid':
+				var maybeUuid = msg.a;
+				if (maybeUuid.$ === 'Nothing') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var uuid = maybeUuid.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								uuid: elm$core$Maybe$Just(uuid)
+							}),
+						elm$core$Platform$Cmd$none);
+				}
+			default:
+				var whichCorner = msg.a;
+				var xy = msg.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							uuid: elm$core$Maybe$Just(uuid)
+							drag: elm$core$Maybe$Just(
+								{dragStart: xy, itemDragged: whichCorner})
 						}),
 					elm$core$Platform$Cmd$none);
-			}
 		}
 	});
 var author$project$Main$update = F2(
@@ -5587,6 +5612,10 @@ var author$project$Coordinate$listToString = function (list) {
 		return '';
 	}
 };
+var author$project$SvgPolygon$MouseDownSelectionBall = F2(
+	function (a, b) {
+		return {$: 'MouseDownSelectionBall', a: a, b: b};
+	});
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$succeed = _Json_succeed;
@@ -5608,10 +5637,27 @@ var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$svg$Svg$Events$onMouseDown = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'mousedown',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$SvgPolygon$listToSelectionBalls = function (list) {
 	return A2(
 		elm$core$List$map,
-		function (xy) {
+		function (item) {
 			return A2(
 				elm$svg$Svg$circle,
 				_List_fromArray(
@@ -5619,9 +5665,14 @@ var author$project$SvgPolygon$listToSelectionBalls = function (list) {
 						elm$svg$Svg$Attributes$fill('blue'),
 						elm$svg$Svg$Attributes$r('10'),
 						elm$svg$Svg$Attributes$cx(
-						elm$core$String$fromFloat(xy.x)),
+						elm$core$String$fromFloat(item.xy.x)),
 						elm$svg$Svg$Attributes$cy(
-						elm$core$String$fromFloat(xy.y))
+						elm$core$String$fromFloat(item.xy.y)),
+						elm$svg$Svg$Events$onMouseDown(
+						A2(
+							author$project$SvgPolygon$MouseDownSelectionBall,
+							item.w,
+							{x: 1, y: 1}))
 					]),
 				_List_Nil);
 		},
@@ -5650,17 +5701,6 @@ var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
 var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
 var elm$svg$Svg$Events$onClick = function (msg) {
 	return A2(
 		elm$html$Html$Events$on,
@@ -5686,7 +5726,7 @@ var author$project$SvgPolygon$view = function (model) {
 								elm$svg$Svg$Attributes$points(
 								author$project$Coordinate$listToString(
 									_List_fromArray(
-										[model.one, model.two, model.three])))
+										[model.one.xy, model.two.xy, model.three.xy])))
 							]),
 						_List_Nil)
 					]),
