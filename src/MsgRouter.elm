@@ -23,8 +23,6 @@ reconstructMainMsg msg model =
   case msg of 
     SvgPolygonMsg svgPolygonMsg ->
       case svgPolygonMsg of
-        None ->
-          ({uuidGeneratorModel = Nothing},msg)
         Uuid maybeUuid ->
           case maybeUuid of
             Just _ ->
@@ -34,9 +32,10 @@ reconstructMainMsg msg model =
                 (newUuidModel, newUuidCmd) = UuidGenerator.update NewUuid model.uuidGeneratorModel
                 newUuid = newUuidModel.currentUuid
               in 
-                --Html.map SvgPolygonMsg (Uuid newUuid)
                 ({uuidGeneratorModel = Just newUuidModel}, SvgPolygonMsg (Uuid newUuid))
-    UuidGeneratorMsg uuidGeneratorMsg ->
+        _ ->
+          ({uuidGeneratorModel = Nothing},msg)
+    _ ->
        ({uuidGeneratorModel = Nothing},msg)
 
 

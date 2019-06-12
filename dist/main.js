@@ -1720,7 +1720,7 @@ function _Json_runArrayDecoder(decoder, value, toElmValue)
 
 function _Json_isArray(value)
 {
-	return Array.isArray(value) || (typeof FileList === 'function' && value instanceof FileList);
+	return Array.isArray(value) || (typeof FileList !== 'undefined' && value instanceof FileList);
 }
 
 function _Json_toElmArray(array)
@@ -5501,11 +5501,7 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 	function (msg, model) {
 		if (msg.$ === 'SvgPolygonMsg') {
 			var svgPolygonMsg = msg.a;
-			if (svgPolygonMsg.$ === 'None') {
-				return _Utils_Tuple2(
-					{uuidGeneratorModel: elm$core$Maybe$Nothing},
-					msg);
-			} else {
+			if (svgPolygonMsg.$ === 'Uuid') {
 				var maybeUuid = svgPolygonMsg.a;
 				if (maybeUuid.$ === 'Just') {
 					return _Utils_Tuple2(
@@ -5523,9 +5519,12 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 						author$project$MsgRouter$SvgPolygonMsg(
 							author$project$SvgPolygon$Uuid(newUuid)));
 				}
+			} else {
+				return _Utils_Tuple2(
+					{uuidGeneratorModel: elm$core$Maybe$Nothing},
+					msg);
 			}
 		} else {
-			var uuidGeneratorMsg = msg.a;
 			return _Utils_Tuple2(
 				{uuidGeneratorModel: elm$core$Maybe$Nothing},
 				msg);
@@ -5550,17 +5549,62 @@ var author$project$SvgPolygon$update = F2(
 							}),
 						elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'MouseDownSelectionBall':
 				var whichCorner = msg.a;
-				var xy = msg.b;
+				var xyDragStart = msg.b;
+				var xyBall = msg.c;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							drag: elm$core$Maybe$Just(
-								{dragStart: xy, itemDragged: whichCorner})
+								{dragStart: xyDragStart, itemDragged: whichCorner, originalPositionBall: xyBall})
 						}),
 					elm$core$Platform$Cmd$none);
+			case 'MouseUp':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{drag: elm$core$Maybe$Nothing}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var xy = msg.a;
+				var _n2 = model.drag;
+				if (_n2.$ === 'Nothing') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var dragModel = _n2.a;
+					var deltaY = dragModel.dragStart.y - xy.y;
+					var deltaX = dragModel.dragStart.x - xy.x;
+					var newCoordinat = {x: dragModel.originalPositionBall.x - deltaX, y: dragModel.originalPositionBall.y - deltaY};
+					var _n3 = dragModel.itemDragged;
+					switch (_n3.$) {
+						case 'One':
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										one: {w: author$project$SvgDragModel$One, xy: newCoordinat}
+									}),
+								elm$core$Platform$Cmd$none);
+						case 'Two':
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										two: {w: author$project$SvgDragModel$Two, xy: newCoordinat}
+									}),
+								elm$core$Platform$Cmd$none);
+						default:
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										three: {w: author$project$SvgDragModel$Three, xy: newCoordinat}
+									}),
+								elm$core$Platform$Cmd$none);
+					}
+				}
 		}
 	});
 var author$project$Main$update = F2(
@@ -5612,12 +5656,18 @@ var author$project$Coordinate$listToString = function (list) {
 		return '';
 	}
 };
-var author$project$SvgPolygon$MouseDownSelectionBall = F2(
-	function (a, b) {
-		return {$: 'MouseDownSelectionBall', a: a, b: b};
+var author$project$SvgPolygon$MouseUp = {$: 'MouseUp'};
+var author$project$SvgPolygon$MouseDownSelectionBall = F3(
+	function (a, b, c) {
+		return {$: 'MouseDownSelectionBall', a: a, b: b, c: c};
 	});
-var elm$json$Json$Decode$map = _Json_map1;
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$int = _Json_decodeInt;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
@@ -5631,15 +5681,6 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
 var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var elm$html$Html$Events$on = F2(
 	function (event, decoder) {
@@ -5648,10 +5689,35 @@ var elm$html$Html$Events$on = F2(
 			event,
 			elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var elm$svg$Svg$Events$onMouseDown = function (msg) {
+var elm$svg$Svg$Events$on = elm$html$Html$Events$on;
+var author$project$SvgPolygon$onMouseDownWithCoordinates = F2(
+	function (whichTriangle, circleCoordinates) {
+		return A2(
+			elm$svg$Svg$Events$on,
+			'mousedown',
+			A3(
+				elm$json$Json$Decode$map2,
+				F2(
+					function (x, y) {
+						return A3(
+							author$project$SvgPolygon$MouseDownSelectionBall,
+							whichTriangle,
+							{x: x, y: y},
+							circleCoordinates);
+					}),
+				A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
+				A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
+	});
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$svg$Svg$Events$onMouseUp = function (msg) {
 	return A2(
 		elm$html$Html$Events$on,
-		'mousedown',
+		'mouseup',
 		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$SvgPolygon$listToSelectionBalls = function (list) {
@@ -5668,20 +5734,28 @@ var author$project$SvgPolygon$listToSelectionBalls = function (list) {
 						elm$core$String$fromFloat(item.xy.x)),
 						elm$svg$Svg$Attributes$cy(
 						elm$core$String$fromFloat(item.xy.y)),
-						elm$svg$Svg$Events$onMouseDown(
-						A2(
-							author$project$SvgPolygon$MouseDownSelectionBall,
-							item.w,
-							{x: 1, y: 1}))
+						A2(author$project$SvgPolygon$onMouseDownWithCoordinates, item.w, item.xy),
+						elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp)
 					]),
 				_List_Nil);
 		},
 		list);
 };
-var danyx23$elm_uuid$Uuid$toString = function (_n0) {
-	var internalString = _n0.a;
-	return internalString;
+var author$project$SvgPolygon$MouseMove = function (a) {
+	return {$: 'MouseMove', a: a};
 };
+var author$project$SvgPolygon$onMouseMoveWithCoordinates = A2(
+	elm$svg$Svg$Events$on,
+	'mousemove',
+	A3(
+		elm$json$Json$Decode$map2,
+		F2(
+			function (x, y) {
+				return author$project$SvgPolygon$MouseMove(
+					{x: x, y: y});
+			}),
+		A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
+		A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5710,7 +5784,11 @@ var elm$svg$Svg$Events$onClick = function (msg) {
 var author$project$SvgPolygon$view = function (model) {
 	return A2(
 		elm$svg$Svg$g,
-		_List_Nil,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
+				author$project$SvgPolygon$onMouseMoveWithCoordinates
+			]),
 		elm$core$List$concat(
 			_List_fromArray(
 				[
@@ -5721,6 +5799,7 @@ var author$project$SvgPolygon$view = function (model) {
 						_List_fromArray(
 							[
 								elm$svg$Svg$Attributes$fill('purple'),
+								elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
 								elm$svg$Svg$Events$onClick(
 								author$project$SvgPolygon$Uuid(elm$core$Maybe$Nothing)),
 								elm$svg$Svg$Attributes$points(
@@ -5734,7 +5813,7 @@ var author$project$SvgPolygon$view = function (model) {
 					_List_fromArray(
 						[model.one, model.two, model.three])),
 					function () {
-					var _n0 = model.uuid;
+					var _n0 = model.drag;
 					if (_n0.$ === 'Nothing') {
 						return _List_fromArray(
 							[
@@ -5748,11 +5827,11 @@ var author$project$SvgPolygon$view = function (model) {
 									]),
 								_List_fromArray(
 									[
-										elm$svg$Svg$text('Uuid placeholder!')
+										elm$svg$Svg$text('drag placeholder!')
 									]))
 							]);
 					} else {
-						var uuid = _n0.a;
+						var drag = _n0.a;
 						return _List_fromArray(
 							[
 								A2(
@@ -5766,7 +5845,7 @@ var author$project$SvgPolygon$view = function (model) {
 								_List_fromArray(
 									[
 										elm$svg$Svg$text(
-										danyx23$elm_uuid$Uuid$toString(uuid))
+										elm$core$String$fromFloat(drag.dragStart.x))
 									]))
 							]);
 					}
@@ -5774,14 +5853,12 @@ var author$project$SvgPolygon$view = function (model) {
 				])));
 };
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var author$project$SvgTag$tag = function (children) {
 	return A2(
 		elm$svg$Svg$svg,
 		_List_fromArray(
 			[
-				elm$svg$Svg$Attributes$viewBox('-100 -100 200 200'),
 				elm$svg$Svg$Attributes$width('300px')
 			]),
 		children);
@@ -5953,7 +6030,6 @@ var elm$url$Url$fromString = function (str) {
 		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
 };
 var elm$browser$Browser$element = _Browser_element;
-var elm$json$Json$Decode$int = _Json_decodeInt;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)(0)}});}(this));
