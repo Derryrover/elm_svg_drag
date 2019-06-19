@@ -15,7 +15,10 @@ import UuidGenerator
 
 import SvgTag
 import SvgPolygon
+import SvgTypes exposing (Viewbox)
+
 import MsgRouter exposing(Msg(..), Model)
+
 
 main = Browser.element
   { init = init
@@ -42,7 +45,8 @@ view model =
   div 
     []
     [ 
-      SvgTag.tag [ Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel) ]
+      -- SvgTag.tag (\viewBox->[ Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel viewBox) ])
+      Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel) 
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )

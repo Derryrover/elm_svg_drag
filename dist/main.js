@@ -5002,6 +5002,7 @@ var author$project$SvgPolygon$init = _Utils_Tuple2(
 			w: author$project$SvgDragModel$One,
 			xy: {x: -50, y: -50.0}
 		},
+		svgDom: elm$core$Maybe$Nothing,
 		three: {
 			w: author$project$SvgDragModel$Three,
 			xy: {x: 0.0, y: 50.0}
@@ -5530,357 +5531,12 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 				msg);
 		}
 	});
-var author$project$SvgPolygon$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'None':
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			case 'Uuid':
-				var maybeUuid = msg.a;
-				if (maybeUuid.$ === 'Nothing') {
-					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-				} else {
-					var uuid = maybeUuid.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								uuid: elm$core$Maybe$Just(uuid)
-							}),
-						elm$core$Platform$Cmd$none);
-				}
-			case 'MouseDownSelectionBall':
-				var whichCorner = msg.a;
-				var xyDragStart = msg.b;
-				var xyBall = msg.c;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							drag: elm$core$Maybe$Just(
-								{dragStart: xyDragStart, itemDragged: whichCorner, originalPositionBall: xyBall})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'MouseUp':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{drag: elm$core$Maybe$Nothing}),
-					elm$core$Platform$Cmd$none);
-			default:
-				var xy = msg.a;
-				var _n2 = model.drag;
-				if (_n2.$ === 'Nothing') {
-					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-				} else {
-					var dragModel = _n2.a;
-					var deltaY = dragModel.dragStart.y - xy.y;
-					var deltaX = dragModel.dragStart.x - xy.x;
-					var newCoordinat = {x: dragModel.originalPositionBall.x - deltaX, y: dragModel.originalPositionBall.y - deltaY};
-					var _n3 = dragModel.itemDragged;
-					switch (_n3.$) {
-						case 'One':
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										one: {w: author$project$SvgDragModel$One, xy: newCoordinat}
-									}),
-								elm$core$Platform$Cmd$none);
-						case 'Two':
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										two: {w: author$project$SvgDragModel$Two, xy: newCoordinat}
-									}),
-								elm$core$Platform$Cmd$none);
-						default:
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										three: {w: author$project$SvgDragModel$Three, xy: newCoordinat}
-									}),
-								elm$core$Platform$Cmd$none);
-					}
-				}
-		}
-	});
-var author$project$Main$update = F2(
-	function (preMsg, model) {
-		var _n0 = A2(author$project$MsgRouter$reconstructMainMsg, preMsg, model);
-		var maybeModel = _n0.a;
-		var msg = _n0.b;
-		var newUuidModel = function () {
-			var _n4 = maybeModel.uuidGeneratorModel;
-			if (_n4.$ === 'Nothing') {
-				return model.uuidGeneratorModel;
-			} else {
-				var uuidGeneratorModel = _n4.a;
-				return uuidGeneratorModel;
-			}
-		}();
-		if (msg.$ === 'SvgPolygonMsg') {
-			var svgPolygonMsg = msg.a;
-			var _n2 = A2(author$project$SvgPolygon$update, svgPolygonMsg, model.svgPolygonModel);
-			var svgPolygonModel = _n2.a;
-			var svgPolygonCommand = _n2.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{svgPolygonModel: svgPolygonModel, uuidGeneratorModel: newUuidModel}),
-				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$SvgPolygonMsg, svgPolygonCommand));
-		} else {
-			var uuidGeneratorMsg = msg.a;
-			var _n3 = A2(author$project$UuidGenerator$update, uuidGeneratorMsg, model.uuidGeneratorModel);
-			var uuidGeneratorModel = _n3.a;
-			var uuidGeneratorCommand = _n3.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{uuidGeneratorModel: uuidGeneratorModel}),
-				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand));
-		}
-	});
-var elm$core$String$fromFloat = _String_fromNumber;
-var author$project$Coordinate$toSvgString = function (xy) {
-	return elm$core$String$fromFloat(xy.x) + (',' + elm$core$String$fromFloat(xy.y));
+var author$project$SvgPolygon$GetSvg = function (a) {
+	return {$: 'GetSvg', a: a};
 };
-var author$project$Coordinate$listToString = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return author$project$Coordinate$toSvgString(x) + (' ' + author$project$Coordinate$listToString(xs));
-	} else {
-		return '';
-	}
-};
-var author$project$SvgPolygon$MouseUp = {$: 'MouseUp'};
-var author$project$SvgPolygon$MouseDownSelectionBall = F3(
-	function (a, b, c) {
-		return {$: 'MouseDownSelectionBall', a: a, b: b, c: c};
-	});
-var elm$json$Json$Decode$field = _Json_decodeField;
-var elm$json$Json$Decode$int = _Json_decodeInt;
-var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var elm$svg$Svg$Events$on = elm$html$Html$Events$on;
-var author$project$SvgPolygon$onMouseDownWithCoordinates = F2(
-	function (whichTriangle, circleCoordinates) {
-		return A2(
-			elm$svg$Svg$Events$on,
-			'mousedown',
-			A3(
-				elm$json$Json$Decode$map2,
-				F2(
-					function (x, y) {
-						return A3(
-							author$project$SvgPolygon$MouseDownSelectionBall,
-							whichTriangle,
-							{x: x, y: y},
-							circleCoordinates);
-					}),
-				A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
-				A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
-	});
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$svg$Svg$Events$onMouseUp = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'mouseup',
-		elm$json$Json$Decode$succeed(msg));
-};
-var author$project$SvgPolygon$listToSelectionBalls = function (list) {
-	return A2(
-		elm$core$List$map,
-		function (item) {
-			return A2(
-				elm$svg$Svg$circle,
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$fill('blue'),
-						elm$svg$Svg$Attributes$r('10'),
-						elm$svg$Svg$Attributes$cx(
-						elm$core$String$fromFloat(item.xy.x)),
-						elm$svg$Svg$Attributes$cy(
-						elm$core$String$fromFloat(item.xy.y)),
-						A2(author$project$SvgPolygon$onMouseDownWithCoordinates, item.w, item.xy),
-						elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp)
-					]),
-				_List_Nil);
-		},
-		list);
-};
-var author$project$SvgPolygon$MouseMove = function (a) {
-	return {$: 'MouseMove', a: a};
-};
-var author$project$SvgPolygon$onMouseMoveWithCoordinates = A2(
-	elm$svg$Svg$Events$on,
-	'mousemove',
-	A3(
-		elm$json$Json$Decode$map2,
-		F2(
-			function (x, y) {
-				return author$project$SvgPolygon$MouseMove(
-					{x: x, y: y});
-			}),
-		A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
-		A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
-var elm$svg$Svg$polygon = elm$svg$Svg$trustedNode('polygon');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
-var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
-var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
-var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var elm$svg$Svg$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
-};
-var author$project$SvgPolygon$view = function (model) {
-	return A2(
-		elm$svg$Svg$g,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
-				author$project$SvgPolygon$onMouseMoveWithCoordinates
-			]),
-		elm$core$List$concat(
-			_List_fromArray(
-				[
-					_List_fromArray(
-					[
-						A2(
-						elm$svg$Svg$polygon,
-						_List_fromArray(
-							[
-								elm$svg$Svg$Attributes$fill('purple'),
-								elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
-								elm$svg$Svg$Events$onClick(
-								author$project$SvgPolygon$Uuid(elm$core$Maybe$Nothing)),
-								elm$svg$Svg$Attributes$points(
-								author$project$Coordinate$listToString(
-									_List_fromArray(
-										[model.one.xy, model.two.xy, model.three.xy])))
-							]),
-						_List_Nil)
-					]),
-					author$project$SvgPolygon$listToSelectionBalls(
-					_List_fromArray(
-						[model.one, model.two, model.three])),
-					function () {
-					var _n0 = model.drag;
-					if (_n0.$ === 'Nothing') {
-						return _List_fromArray(
-							[
-								A2(
-								elm$svg$Svg$text_,
-								_List_fromArray(
-									[
-										elm$svg$Svg$Attributes$x('0'),
-										elm$svg$Svg$Attributes$y('15'),
-										elm$svg$Svg$Attributes$fill('red')
-									]),
-								_List_fromArray(
-									[
-										elm$svg$Svg$text('drag placeholder!')
-									]))
-							]);
-					} else {
-						var drag = _n0.a;
-						return _List_fromArray(
-							[
-								A2(
-								elm$svg$Svg$text_,
-								_List_fromArray(
-									[
-										elm$svg$Svg$Attributes$x('0'),
-										elm$svg$Svg$Attributes$y('15'),
-										elm$svg$Svg$Attributes$fill('red')
-									]),
-								_List_fromArray(
-									[
-										elm$svg$Svg$text(
-										elm$core$String$fromFloat(drag.dragStart.x))
-									]))
-							]);
-					}
-				}()
-				])));
-};
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var author$project$SvgTag$tag = function (children) {
-	return A2(
-		elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Attributes$width('300px')
-			]),
-		children);
-};
-var elm$html$Html$div = _VirtualDom_node('div');
-var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
-var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
-var author$project$Main$view = function (model) {
-	return A2(
-		elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				author$project$SvgTag$tag(
-				_List_fromArray(
-					[
-						A2(
-						elm$html$Html$map,
-						author$project$MsgRouter$SvgPolygonMsg,
-						author$project$SvgPolygon$view(model.svgPolygonModel))
-					]))
-			]));
+var danyx23$elm_uuid$Uuid$toString = function (_n0) {
+	var internalString = _n0.a;
+	return internalString;
 };
 var elm$browser$Browser$External = function (a) {
 	return {$: 'External', a: a};
@@ -5898,6 +5554,21 @@ var elm$core$Basics$never = function (_n0) {
 		var $temp$_n0 = nvr;
 		_n0 = $temp$_n0;
 		continue never;
+	}
+};
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
 	}
 };
 var elm$core$String$length = _String_length;
@@ -6028,6 +5699,483 @@ var elm$url$Url$fromString = function (str) {
 		elm$url$Url$chompAfterProtocol,
 		elm$url$Url$Https,
 		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
+};
+var elm$browser$Browser$Dom$getElement = _Browser_getElement;
+var elm$core$Debug$log = _Debug_log;
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var elm$core$Task$onError = _Scheduler_onError;
+var elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(
+					elm$core$Task$onError,
+					A2(
+						elm$core$Basics$composeL,
+						A2(elm$core$Basics$composeL, elm$core$Task$succeed, resultToMessage),
+						elm$core$Result$Err),
+					A2(
+						elm$core$Task$andThen,
+						A2(
+							elm$core$Basics$composeL,
+							A2(elm$core$Basics$composeL, elm$core$Task$succeed, resultToMessage),
+							elm$core$Result$Ok),
+						task))));
+	});
+var author$project$SvgPolygon$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'None':
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			case 'Uuid':
+				var maybeUuid = msg.a;
+				if (maybeUuid.$ === 'Nothing') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var uuid = maybeUuid.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								uuid: elm$core$Maybe$Just(uuid)
+							}),
+						elm$core$Platform$Cmd$none);
+				}
+			case 'MouseDownSelectionBall':
+				var whichCorner = msg.a;
+				var xyDragStart = msg.b;
+				var xyBall = msg.c;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							drag: elm$core$Maybe$Just(
+								{dragStart: xyDragStart, itemDragged: whichCorner, originalPositionBall: xyBall})
+						}),
+					function () {
+						var _n2 = model.uuid;
+						if (_n2.$ === 'Nothing') {
+							return elm$core$Platform$Cmd$none;
+						} else {
+							var uuid = _n2.a;
+							return A2(
+								elm$core$Task$attempt,
+								author$project$SvgPolygon$GetSvg,
+								elm$browser$Browser$Dom$getElement(
+									danyx23$elm_uuid$Uuid$toString(uuid)));
+						}
+					}());
+			case 'GetSvg':
+				var element = msg.a;
+				if (element.$ === 'Err') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var value = element.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								svgDom: elm$core$Maybe$Just(value)
+							}),
+						elm$core$Platform$Cmd$none);
+				}
+			case 'MouseUp':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{drag: elm$core$Maybe$Nothing}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var viewbox = msg.a;
+				var squareSize = msg.b;
+				var xy = msg.c;
+				var _n4 = model.drag;
+				if (_n4.$ === 'Nothing') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var dragModel = _n4.a;
+					var _n5 = model.svgDom;
+					if (_n5.$ === 'Nothing') {
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+					} else {
+						var element = _n5.a;
+						var deltaY = (dragModel.dragStart.y - xy.y) * (viewbox.height / A2(elm$core$Debug$log, 'squareSize.height', element.element.height));
+						var deltaX = (dragModel.dragStart.x - xy.x) * (viewbox.width / element.element.width);
+						var newCoordinat = {x: dragModel.originalPositionBall.x - deltaX, y: dragModel.originalPositionBall.y - deltaY};
+						var _n6 = dragModel.itemDragged;
+						switch (_n6.$) {
+							case 'One':
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											one: {w: author$project$SvgDragModel$One, xy: newCoordinat}
+										}),
+									elm$core$Platform$Cmd$none);
+							case 'Two':
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											two: {w: author$project$SvgDragModel$Two, xy: newCoordinat}
+										}),
+									elm$core$Platform$Cmd$none);
+							default:
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											three: {w: author$project$SvgDragModel$Three, xy: newCoordinat}
+										}),
+									elm$core$Platform$Cmd$none);
+						}
+					}
+				}
+		}
+	});
+var author$project$Main$update = F2(
+	function (preMsg, model) {
+		var _n0 = A2(author$project$MsgRouter$reconstructMainMsg, preMsg, model);
+		var maybeModel = _n0.a;
+		var msg = _n0.b;
+		var newUuidModel = function () {
+			var _n4 = maybeModel.uuidGeneratorModel;
+			if (_n4.$ === 'Nothing') {
+				return model.uuidGeneratorModel;
+			} else {
+				var uuidGeneratorModel = _n4.a;
+				return uuidGeneratorModel;
+			}
+		}();
+		if (msg.$ === 'SvgPolygonMsg') {
+			var svgPolygonMsg = msg.a;
+			var _n2 = A2(author$project$SvgPolygon$update, svgPolygonMsg, model.svgPolygonModel);
+			var svgPolygonModel = _n2.a;
+			var svgPolygonCommand = _n2.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{svgPolygonModel: svgPolygonModel, uuidGeneratorModel: newUuidModel}),
+				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$SvgPolygonMsg, svgPolygonCommand));
+		} else {
+			var uuidGeneratorMsg = msg.a;
+			var _n3 = A2(author$project$UuidGenerator$update, uuidGeneratorMsg, model.uuidGeneratorModel);
+			var uuidGeneratorModel = _n3.a;
+			var uuidGeneratorCommand = _n3.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{uuidGeneratorModel: uuidGeneratorModel}),
+				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand));
+		}
+	});
+var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$Coordinate$toSvgString = function (xy) {
+	return elm$core$String$fromFloat(xy.x) + (',' + elm$core$String$fromFloat(xy.y));
+};
+var author$project$Coordinate$listToString = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return author$project$Coordinate$toSvgString(x) + (' ' + author$project$Coordinate$listToString(xs));
+	} else {
+		return '';
+	}
+};
+var author$project$SvgPolygon$MouseUp = {$: 'MouseUp'};
+var author$project$SvgPolygon$MouseMove = F3(
+	function (a, b, c) {
+		return {$: 'MouseMove', a: a, b: b, c: c};
+	});
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
+	});
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$json$Json$Decode$map4 = _Json_map4;
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$svg$Svg$Events$on = elm$html$Html$Events$on;
+var author$project$SvgPolygon$onMouseMoveWithCoordinates = function (viewbox) {
+	return A2(
+		elm$svg$Svg$Events$on,
+		'mousemove',
+		A5(
+			elm$json$Json$Decode$map4,
+			F4(
+				function (x, y, width, height) {
+					return A3(
+						author$project$SvgPolygon$MouseMove,
+						viewbox,
+						{height: height, width: width},
+						{x: x, y: y});
+				}),
+			A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
+			A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int),
+			A2(
+				elm$json$Json$Decode$at,
+				_List_fromArray(
+					['target', 'ownerSVGElement', 'width', 'animVal', 'value']),
+				elm$json$Json$Decode$int),
+			A2(
+				elm$json$Json$Decode$at,
+				_List_fromArray(
+					['target', 'ownerSVGElement', 'height', 'animVal', 'value']),
+				elm$json$Json$Decode$int)));
+};
+var author$project$SvgPolygon$viewboxConfig = {height: 200, width: 200, xLeft: -100, yTop: -100};
+var author$project$SvgTypes$viewBoxToString = function (v) {
+	return elm$core$String$fromFloat(v.xLeft) + (' ' + (elm$core$String$fromFloat(v.yTop) + (' ' + (elm$core$String$fromFloat(v.width) + (' ' + elm$core$String$fromFloat(v.height))))));
+};
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$Events$onMouseUp = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'mouseup',
+		elm$json$Json$Decode$succeed(msg));
+};
+var author$project$SvgPolygon$getSvgAttributes = function (model) {
+	var staticAttributes = _List_fromArray(
+		[
+			elm$svg$Svg$Attributes$viewBox(
+			author$project$SvgTypes$viewBoxToString(author$project$SvgPolygon$viewboxConfig)),
+			elm$svg$Svg$Attributes$width('300px'),
+			elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
+			author$project$SvgPolygon$onMouseMoveWithCoordinates(author$project$SvgPolygon$viewboxConfig)
+		]);
+	var id = function () {
+		var _n0 = model.uuid;
+		if (_n0.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var uuid = _n0.a;
+			return _List_fromArray(
+				[
+					elm$svg$Svg$Attributes$id(
+					danyx23$elm_uuid$Uuid$toString(uuid))
+				]);
+		}
+	}();
+	return elm$core$List$concat(
+		_List_fromArray(
+			[staticAttributes, id]));
+};
+var author$project$SvgPolygon$MouseDownSelectionBall = F3(
+	function (a, b, c) {
+		return {$: 'MouseDownSelectionBall', a: a, b: b, c: c};
+	});
+var author$project$SvgPolygon$onMouseDownWithCoordinates = F2(
+	function (whichTriangle, circleCoordinates) {
+		return A2(
+			elm$svg$Svg$Events$on,
+			'mousedown',
+			A3(
+				elm$json$Json$Decode$map2,
+				F2(
+					function (x, y) {
+						return A3(
+							author$project$SvgPolygon$MouseDownSelectionBall,
+							whichTriangle,
+							{x: x, y: y},
+							circleCoordinates);
+					}),
+				A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
+				A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
+	});
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var author$project$SvgPolygon$listToSelectionBalls = function (list) {
+	return A2(
+		elm$core$List$map,
+		function (item) {
+			return A2(
+				elm$svg$Svg$circle,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$fill('blue'),
+						elm$svg$Svg$Attributes$r('10'),
+						elm$svg$Svg$Attributes$cx(
+						elm$core$String$fromFloat(item.xy.x)),
+						elm$svg$Svg$Attributes$cy(
+						elm$core$String$fromFloat(item.xy.y)),
+						A2(author$project$SvgPolygon$onMouseDownWithCoordinates, item.w, item.xy),
+						elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp)
+					]),
+				_List_Nil);
+		},
+		list);
+};
+var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
+var elm$svg$Svg$polygon = elm$svg$Svg$trustedNode('polygon');
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$Attributes$fillOpacity = _VirtualDom_attribute('fill-opacity');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var elm$svg$Svg$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
+var author$project$SvgPolygon$view = function (model) {
+	return A2(
+		elm$svg$Svg$svg,
+		author$project$SvgPolygon$getSvgAttributes(model),
+		_List_fromArray(
+			[
+				A2(
+				elm$svg$Svg$g,
+				_List_Nil,
+				elm$core$List$concat(
+					_List_fromArray(
+						[
+							_List_fromArray(
+							[
+								A2(
+								elm$svg$Svg$rect,
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$fillOpacity('0'),
+										elm$svg$Svg$Attributes$x('-100'),
+										elm$svg$Svg$Attributes$y('-100'),
+										elm$svg$Svg$Attributes$width('200'),
+										elm$svg$Svg$Attributes$height('200')
+									]),
+								_List_Nil)
+							]),
+							_List_fromArray(
+							[
+								A2(
+								elm$svg$Svg$polygon,
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$fill('purple'),
+										elm$svg$Svg$Events$onMouseUp(author$project$SvgPolygon$MouseUp),
+										elm$svg$Svg$Events$onClick(
+										author$project$SvgPolygon$Uuid(elm$core$Maybe$Nothing)),
+										elm$svg$Svg$Attributes$points(
+										author$project$Coordinate$listToString(
+											_List_fromArray(
+												[model.one.xy, model.two.xy, model.three.xy])))
+									]),
+								_List_Nil)
+							]),
+							author$project$SvgPolygon$listToSelectionBalls(
+							_List_fromArray(
+								[model.one, model.two, model.three])),
+							_List_fromArray(
+							[
+								A2(
+								elm$svg$Svg$circle,
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$r('1'),
+										elm$svg$Svg$Attributes$cx('-100'),
+										elm$svg$Svg$Attributes$cy('-100')
+									]),
+								_List_Nil),
+								A2(
+								elm$svg$Svg$circle,
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$r('1'),
+										elm$svg$Svg$Attributes$cx('100'),
+										elm$svg$Svg$Attributes$cy('100')
+									]),
+								_List_Nil)
+							]),
+							function () {
+							var _n0 = model.uuid;
+							if (_n0.$ === 'Nothing') {
+								return _List_fromArray(
+									[
+										A2(
+										elm$svg$Svg$text_,
+										_List_fromArray(
+											[
+												elm$svg$Svg$Attributes$x('0'),
+												elm$svg$Svg$Attributes$y('15'),
+												elm$svg$Svg$Attributes$fill('red')
+											]),
+										_List_fromArray(
+											[
+												elm$svg$Svg$text('Uuid placeholder!')
+											]))
+									]);
+							} else {
+								var uuid = _n0.a;
+								return _List_fromArray(
+									[
+										A2(
+										elm$svg$Svg$text_,
+										_List_fromArray(
+											[
+												elm$svg$Svg$Attributes$x('0'),
+												elm$svg$Svg$Attributes$y('15'),
+												elm$svg$Svg$Attributes$fill('red')
+											]),
+										_List_fromArray(
+											[
+												elm$svg$Svg$text(
+												danyx23$elm_uuid$Uuid$toString(uuid))
+											]))
+									]);
+							}
+						}()
+						])))
+			]));
+};
+var elm$html$Html$div = _VirtualDom_node('div');
+var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
+var author$project$Main$view = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$map,
+				author$project$MsgRouter$SvgPolygonMsg,
+				author$project$SvgPolygon$view(model.svgPolygonModel))
+			]));
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
