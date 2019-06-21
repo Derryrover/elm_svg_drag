@@ -5918,6 +5918,72 @@ var author$project$Coordinate$listToString = function (list) {
 		return '';
 	}
 };
+var author$project$SvgAnimationView$viewboxConfig = {height: 200, width: 200, xLeft: -100, yTop: -100};
+var author$project$SvgTypes$viewBoxToString = function (v) {
+	return elm$core$String$fromFloat(v.xLeft) + (' ' + (elm$core$String$fromFloat(v.yTop) + (' ' + (elm$core$String$fromFloat(v.width) + (' ' + elm$core$String$fromFloat(v.height))))));
+};
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var author$project$SvgAnimationView$getSvgAttributes = _List_fromArray(
+	[
+		elm$svg$Svg$Attributes$viewBox(
+		author$project$SvgTypes$viewBoxToString(author$project$SvgAnimationView$viewboxConfig)),
+		elm$svg$Svg$Attributes$width('300px')
+	]);
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$animate = elm$svg$Svg$trustedNode('animate');
+var elm$svg$Svg$polygon = elm$svg$Svg$trustedNode('polygon');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$attributeName = _VirtualDom_attribute('attributeName');
+var elm$svg$Svg$Attributes$dur = _VirtualDom_attribute('dur');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var elm$svg$Svg$Attributes$repeatCount = _VirtualDom_attribute('repeatCount');
+var elm$svg$Svg$Attributes$values = function (value) {
+	return A2(
+		_VirtualDom_attribute,
+		'values',
+		_VirtualDom_noJavaScriptUri(value));
+};
+var author$project$SvgAnimationView$view = F2(
+	function (svg1, svg2) {
+		return A2(
+			elm$svg$Svg$svg,
+			author$project$SvgAnimationView$getSvgAttributes,
+			_List_fromArray(
+				[
+					A2(
+					elm$svg$Svg$polygon,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$fill('purple'),
+							elm$svg$Svg$Attributes$points(
+							author$project$Coordinate$listToString(
+								_List_fromArray(
+									[svg1.one.xy, svg1.two.xy, svg1.three.xy])))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$svg$Svg$animate,
+							_List_fromArray(
+								[
+									elm$svg$Svg$Attributes$repeatCount('indefinite'),
+									elm$svg$Svg$Attributes$attributeName('points'),
+									elm$svg$Svg$Attributes$dur('5500ms'),
+									elm$svg$Svg$Attributes$values(
+									author$project$Coordinate$listToString(
+										_List_fromArray(
+											[svg1.one.xy, svg1.two.xy, svg1.three.xy])) + (';' + (author$project$Coordinate$listToString(
+										_List_fromArray(
+											[svg2.one.xy, svg2.two.xy, svg2.three.xy])) + (';' + author$project$Coordinate$listToString(
+										_List_fromArray(
+											[svg1.one.xy, svg1.two.xy, svg1.three.xy]))))))
+								]),
+							_List_Nil)
+						]))
+				]));
+	});
 var author$project$SvgPolygon$MouseUp = {$: 'MouseUp'};
 var author$project$SvgPolygon$MouseMove = F3(
 	function (a, b, c) {
@@ -5970,9 +6036,6 @@ var author$project$SvgPolygon$onMouseMoveWithCoordinates = function (viewbox) {
 				elm$json$Json$Decode$int)));
 };
 var author$project$SvgPolygon$viewboxConfig = {height: 200, width: 200, xLeft: -100, yTop: -100};
-var author$project$SvgTypes$viewBoxToString = function (v) {
-	return elm$core$String$fromFloat(v.xLeft) + (' ' + (elm$core$String$fromFloat(v.yTop) + (' ' + (elm$core$String$fromFloat(v.width) + (' ' + elm$core$String$fromFloat(v.height))))));
-};
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5985,8 +6048,6 @@ var elm$core$List$concat = function (lists) {
 	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
 };
 var elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
-var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var elm$svg$Svg$Events$onMouseUp = function (msg) {
 	return A2(
 		elm$html$Html$Events$on,
@@ -6041,11 +6102,9 @@ var author$project$SvgPolygon$onMouseDownWithCoordinates = F2(
 				A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$int),
 				A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$int)));
 	});
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var author$project$SvgPolygon$listToSelectionBalls = function (list) {
 	return A2(
@@ -6069,15 +6128,12 @@ var author$project$SvgPolygon$listToSelectionBalls = function (list) {
 		list);
 };
 var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
-var elm$svg$Svg$polygon = elm$svg$Svg$trustedNode('polygon');
 var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
 var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
 var elm$svg$Svg$Attributes$fillOpacity = _VirtualDom_attribute('fill-opacity');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var elm$svg$Svg$Events$onClick = function (msg) {
@@ -6207,6 +6263,7 @@ var author$project$Main$view = function (model) {
 				elm$html$Html$map,
 				author$project$MsgRouter$SvgPolygonMsg(1),
 				author$project$SvgPolygon$view(model.svgPolygonModel1)),
+				A2(author$project$SvgAnimationView$view, model.svgPolygonModel1, model.svgPolygonModel2),
 				A2(
 				elm$html$Html$map,
 				author$project$MsgRouter$SvgPolygonMsg(2),
