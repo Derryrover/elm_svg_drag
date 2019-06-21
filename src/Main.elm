@@ -30,14 +30,20 @@ main = Browser.element
 init : Int -> (Model, Cmd Msg)
 init seedUuid =
   let 
-    (svgPolygonModel, svgPolygonCommand) = SvgPolygon.init
+    (svgPolygonModel1, svgPolygonCommand1) = SvgPolygon.init
+    (svgPolygonModel2, svgPolygonCommand2) = SvgPolygon.init
     (uuidGeneratorModel, uuidGeneratorCommand) = UuidGenerator.init seedUuid
   in
     (
-        { svgPolygonModel = svgPolygonModel 
+        { svgPolygonModel1 = svgPolygonModel1
+        , svgPolygonModel2 = svgPolygonModel2  
         , uuidGeneratorModel = uuidGeneratorModel
         }
-      , Cmd.batch [Cmd.map SvgPolygonMsg svgPolygonCommand, Cmd.map UuidGeneratorMsg uuidGeneratorCommand]
+      , Cmd.batch 
+        [ Cmd.map (SvgPolygonMsg 1) svgPolygonCommand1
+        , Cmd.map (SvgPolygonMsg 2) svgPolygonCommand2
+        , Cmd.map UuidGeneratorMsg uuidGeneratorCommand
+        ]
     )
 
 view : Model -> Html Msg
@@ -46,7 +52,8 @@ view model =
     []
     [ 
       -- SvgTag.tag (\viewBox->[ Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel viewBox) ])
-      Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel) 
+      Html.map (SvgPolygonMsg 1) (SvgPolygon.view model.svgPolygonModel1)
+    , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)    
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -61,11 +68,17 @@ update preMsg model =
           uuidGeneratorModel
   in
   case msg of
-    SvgPolygonMsg svgPolygonMsg ->
-      let (svgPolygonModel, svgPolygonCommand) = SvgPolygon.update svgPolygonMsg model.svgPolygonModel
-      in 
-        ( { model | svgPolygonModel = svgPolygonModel 
-                  , uuidGeneratorModel= newUuidModel}, Cmd.map SvgPolygonMsg svgPolygonCommand)
+    SvgPolygonMsg int svgPolygonMsg ->
+      if int == 1 then
+        let (svgPolygonModel, svgPolygonCommand) = SvgPolygon.update svgPolygonMsg model.svgPolygonModel1
+        in 
+          ( { model | svgPolygonModel1 = svgPolygonModel 
+                    , uuidGeneratorModel= newUuidModel}, Cmd.map (SvgPolygonMsg 1) svgPolygonCommand)
+      else --int == 2
+        let (svgPolygonModel, svgPolygonCommand) = SvgPolygon.update svgPolygonMsg model.svgPolygonModel2
+        in 
+          ( { model | svgPolygonModel2 = svgPolygonModel 
+                    , uuidGeneratorModel= newUuidModel}, Cmd.map (SvgPolygonMsg 2) svgPolygonCommand)
     UuidGeneratorMsg uuidGeneratorMsg ->
       let (uuidGeneratorModel, uuidGeneratorCommand) = UuidGenerator.update uuidGeneratorMsg model.uuidGeneratorModel
       in ( { model | uuidGeneratorModel = uuidGeneratorModel }, Cmd.map UuidGeneratorMsg uuidGeneratorCommand)

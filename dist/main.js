@@ -4347,9 +4347,10 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$MsgRouter$SvgPolygonMsg = function (a) {
-	return {$: 'SvgPolygonMsg', a: a};
-};
+var author$project$MsgRouter$SvgPolygonMsg = F2(
+	function (a, b) {
+		return {$: 'SvgPolygonMsg', a: a, b: b};
+	});
 var author$project$MsgRouter$UuidGeneratorMsg = function (a) {
 	return {$: 'UuidGeneratorMsg', a: a};
 };
@@ -5053,14 +5054,24 @@ var author$project$Main$init = function (seedUuid) {
 	var uuidGeneratorModel = _n0.a;
 	var uuidGeneratorCommand = _n0.b;
 	var _n1 = author$project$SvgPolygon$init;
-	var svgPolygonModel = _n1.a;
-	var svgPolygonCommand = _n1.b;
+	var svgPolygonModel2 = _n1.a;
+	var svgPolygonCommand2 = _n1.b;
+	var _n2 = author$project$SvgPolygon$init;
+	var svgPolygonModel1 = _n2.a;
+	var svgPolygonCommand1 = _n2.b;
 	return _Utils_Tuple2(
-		{svgPolygonModel: svgPolygonModel, uuidGeneratorModel: uuidGeneratorModel},
+		{svgPolygonModel1: svgPolygonModel1, svgPolygonModel2: svgPolygonModel2, uuidGeneratorModel: uuidGeneratorModel},
 		elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
-					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$SvgPolygonMsg, svgPolygonCommand),
+					A2(
+					elm$core$Platform$Cmd$map,
+					author$project$MsgRouter$SvgPolygonMsg(1),
+					svgPolygonCommand1),
+					A2(
+					elm$core$Platform$Cmd$map,
+					author$project$MsgRouter$SvgPolygonMsg(2),
+					svgPolygonCommand2),
 					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand)
 				])));
 };
@@ -5501,7 +5512,8 @@ var author$project$UuidGenerator$update = F2(
 var author$project$MsgRouter$reconstructMainMsg = F2(
 	function (msg, model) {
 		if (msg.$ === 'SvgPolygonMsg') {
-			var svgPolygonMsg = msg.a;
+			var id = msg.a;
+			var svgPolygonMsg = msg.b;
 			if (svgPolygonMsg.$ === 'Uuid') {
 				var maybeUuid = svgPolygonMsg.a;
 				if (maybeUuid.$ === 'Just') {
@@ -5517,7 +5529,9 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 						{
 							uuidGeneratorModel: elm$core$Maybe$Just(newUuidModel)
 						},
-						author$project$MsgRouter$SvgPolygonMsg(
+						A2(
+							author$project$MsgRouter$SvgPolygonMsg,
+							id,
 							author$project$SvgPolygon$Uuid(newUuid)));
 				}
 			} else {
@@ -5843,29 +5857,47 @@ var author$project$Main$update = F2(
 		var maybeModel = _n0.a;
 		var msg = _n0.b;
 		var newUuidModel = function () {
-			var _n4 = maybeModel.uuidGeneratorModel;
-			if (_n4.$ === 'Nothing') {
+			var _n5 = maybeModel.uuidGeneratorModel;
+			if (_n5.$ === 'Nothing') {
 				return model.uuidGeneratorModel;
 			} else {
-				var uuidGeneratorModel = _n4.a;
+				var uuidGeneratorModel = _n5.a;
 				return uuidGeneratorModel;
 			}
 		}();
 		if (msg.$ === 'SvgPolygonMsg') {
-			var svgPolygonMsg = msg.a;
-			var _n2 = A2(author$project$SvgPolygon$update, svgPolygonMsg, model.svgPolygonModel);
-			var svgPolygonModel = _n2.a;
-			var svgPolygonCommand = _n2.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{svgPolygonModel: svgPolygonModel, uuidGeneratorModel: newUuidModel}),
-				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$SvgPolygonMsg, svgPolygonCommand));
+			var _int = msg.a;
+			var svgPolygonMsg = msg.b;
+			if (_int === 1) {
+				var _n2 = A2(author$project$SvgPolygon$update, svgPolygonMsg, model.svgPolygonModel1);
+				var svgPolygonModel = _n2.a;
+				var svgPolygonCommand = _n2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{svgPolygonModel1: svgPolygonModel, uuidGeneratorModel: newUuidModel}),
+					A2(
+						elm$core$Platform$Cmd$map,
+						author$project$MsgRouter$SvgPolygonMsg(1),
+						svgPolygonCommand));
+			} else {
+				var _n3 = A2(author$project$SvgPolygon$update, svgPolygonMsg, model.svgPolygonModel2);
+				var svgPolygonModel = _n3.a;
+				var svgPolygonCommand = _n3.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{svgPolygonModel2: svgPolygonModel, uuidGeneratorModel: newUuidModel}),
+					A2(
+						elm$core$Platform$Cmd$map,
+						author$project$MsgRouter$SvgPolygonMsg(2),
+						svgPolygonCommand));
+			}
 		} else {
 			var uuidGeneratorMsg = msg.a;
-			var _n3 = A2(author$project$UuidGenerator$update, uuidGeneratorMsg, model.uuidGeneratorModel);
-			var uuidGeneratorModel = _n3.a;
-			var uuidGeneratorCommand = _n3.b;
+			var _n4 = A2(author$project$UuidGenerator$update, uuidGeneratorMsg, model.uuidGeneratorModel);
+			var uuidGeneratorModel = _n4.a;
+			var uuidGeneratorCommand = _n4.b;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
@@ -6173,8 +6205,12 @@ var author$project$Main$view = function (model) {
 			[
 				A2(
 				elm$html$Html$map,
-				author$project$MsgRouter$SvgPolygonMsg,
-				author$project$SvgPolygon$view(model.svgPolygonModel))
+				author$project$MsgRouter$SvgPolygonMsg(1),
+				author$project$SvgPolygon$view(model.svgPolygonModel1)),
+				A2(
+				elm$html$Html$map,
+				author$project$MsgRouter$SvgPolygonMsg(2),
+				author$project$SvgPolygon$view(model.svgPolygonModel2))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
