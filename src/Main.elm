@@ -7,7 +7,8 @@ import Html.Events exposing (onInput)
 import Browser exposing(element)
 
 -- self made modules
--- import ElmStyle
+-- import ElmStyleimport Html.Attributes exposing (style, class,value)
+
 -- import SelfMadeMath
 -- import Time
 -- import Clock
@@ -19,6 +20,9 @@ import SvgAnimationView
 import SvgTypes exposing (Viewbox)
 
 import MsgRouter exposing(Msg(..), Model)
+
+import ViewJson
+import JsonTypes
 
 
 main = Browser.element
