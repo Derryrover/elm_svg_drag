@@ -8,6 +8,8 @@ import Svg.Attributes
 import Svg.Events 
 import Html
 
+import Json.Encode
+
 
 type alias Node = 
   {
@@ -16,6 +18,50 @@ type alias Node =
     -- lateron it might be possible that content is a function composed from natives (thus itself not a true native)
     -- for this svg editor this might not be applicable
   , content: Native
+  , value: String
+  }
+
+nodeToJson node =
+  Json.Encode.object
+    [
+      ("uuid" , ( Json.Encode.string (Uuid.toString node.uuid) ))
+    , ("content" , ( Json.Encode.string (nativeToString node.content) ))
+    , ("value" , ( Json.Encode.string node.value ))
+    ]
+
+type alias NodesList = List Node
+
+type alias Connection = 
+  {
+    from: Uuid.Uuid
+  , to: Uuid.Uuid
+  , name: String
+  }
+
+type alias ConnectionsList = List Connection
+
+initialNodes = 
+  let
+    uuidFromString = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e6"  
+  in
+    case uuidFromString of 
+      Nothing -> 
+        []
+      Just uuid ->
+        [
+          {
+            uuid = uuid
+          , content = Svg
+          , value = ""
+          }
+        ]
+
+initialConnectionsList = []
+
+nodesAndConnections = 
+  {
+    nodes = initialNodes
+  , connections = initialConnectionsList 
   }
 
 -- natives  should have all a procedure for the compiler to stringify them
@@ -27,6 +73,11 @@ type Native =
   ViewBox | Width | Height | Fill | Points | R | Cx | Cy | X | Y | FillOpacity |
   Begin |
   AttributeName | Dur | To | RepeatCount | Values
+
+natives = [Circle , Line , Svg , G , Polygon , Text_ , Text , Animate ,
+  ViewBox , Width , Height , Fill , Points , R , Cx , Cy , X , Y , FillOpacity ,
+  Begin ,
+  AttributeName , Dur , To , RepeatCount , Values]
 
 nativeToString: Native -> String
 nativeToString native = 
