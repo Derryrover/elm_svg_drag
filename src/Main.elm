@@ -23,6 +23,7 @@ import MsgRouter exposing(Msg(..), Model)
 
 import ViewJson
 import JsonTypes
+import Json.Encode
 
 
 main = Browser.element
@@ -59,7 +60,8 @@ view model =
       -- SvgTag.tag (\viewBox->[ Html.map SvgPolygonMsg (SvgPolygon.view model.svgPolygonModel viewBox) ])
       Html.map (SvgPolygonMsg 1) (SvgPolygon.view model.svgPolygonModel1)
     , SvgAnimationView.view model.svgPolygonModel1 model.svgPolygonModel2
-    , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)    
+    , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)
+    , ViewJson.view ( Json.Encode.encode 2  (JsonTypes.nodeListToJson JsonTypes.initialNodes))--("1234")    
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )

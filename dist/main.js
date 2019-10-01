@@ -4347,6 +4347,107 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		out.push(A4(elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		return replacer(A4(elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
 var author$project$MsgRouter$SvgPolygonMsg = F2(
 	function (a, b) {
 		return {$: 'SvgPolygonMsg', a: a, b: b};
@@ -5905,6 +6006,159 @@ var author$project$Main$update = F2(
 				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand));
 		}
 	});
+var author$project$JsonTypes$Polygon = {$: 'Polygon'};
+var author$project$JsonTypes$Svg = {$: 'Svg'};
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var elm$regex$Regex$fromString = function (string) {
+	return A2(
+		elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var elm$regex$Regex$never = _Regex_never;
+var danyx23$elm_uuid$Uuid$Barebones$uuidRegex = A2(
+	elm$core$Maybe$withDefault,
+	elm$regex$Regex$never,
+	elm$regex$Regex$fromString('^[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[1-5][0-9A-Fa-f]{3,3}-[8-9A-Ba-b][0-9A-Fa-f]{3,3}-[0-9A-Fa-f]{12,12}$'));
+var elm$regex$Regex$contains = _Regex_contains;
+var danyx23$elm_uuid$Uuid$Barebones$isValidUuid = function (uuidAsString) {
+	return A2(elm$regex$Regex$contains, danyx23$elm_uuid$Uuid$Barebones$uuidRegex, uuidAsString);
+};
+var elm$core$String$toLower = _String_toLower;
+var danyx23$elm_uuid$Uuid$fromString = function (text) {
+	return danyx23$elm_uuid$Uuid$Barebones$isValidUuid(text) ? elm$core$Maybe$Just(
+		danyx23$elm_uuid$Uuid$Uuid(
+			elm$core$String$toLower(text))) : elm$core$Maybe$Nothing;
+};
+var author$project$JsonTypes$initialNodes = function () {
+	var uuidFromString2 = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e7');
+	var uuidFromString = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e6');
+	if (uuidFromString.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		var uuid = uuidFromString.a;
+		if (uuidFromString2.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var uuid2 = uuidFromString2.a;
+			return _List_fromArray(
+				[
+					{content: author$project$JsonTypes$Svg, uuid: uuid, value: ''},
+					{content: author$project$JsonTypes$Polygon, uuid: uuid2, value: ''}
+				]);
+		}
+	}
+}();
+var author$project$JsonTypes$nativeToString = function (_native) {
+	switch (_native.$) {
+		case 'Circle':
+			return 'circle';
+		case 'Line':
+			return 'line';
+		case 'Svg':
+			return 'svg';
+		case 'G':
+			return 'g';
+		case 'Polygon':
+			return 'polygon';
+		case 'Text_':
+			return 'text_';
+		case 'Text':
+			return 'text';
+		case 'Animate':
+			return 'animate';
+		case 'ViewBox':
+			return 'viewBox';
+		case 'Width':
+			return 'width';
+		case 'Height':
+			return 'height';
+		case 'Fill':
+			return 'fill';
+		case 'Points':
+			return 'points';
+		case 'R':
+			return 'r';
+		case 'Cx':
+			return 'cx';
+		case 'Cy':
+			return 'cy';
+		case 'X':
+			return 'x';
+		case 'Y':
+			return 'y';
+		case 'FillOpacity':
+			return 'fillOpacity';
+		case 'Begin':
+			return 'begin';
+		case 'AttributeName':
+			return 'attributeName';
+		case 'Dur':
+			return 'dur';
+		case 'To':
+			return 'to';
+		case 'RepeatCount':
+			return 'repeatCount';
+		default:
+			return 'values';
+	}
+};
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$JsonTypes$nodeToJson = function (node) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'uuid',
+				elm$json$Json$Encode$string(
+					danyx23$elm_uuid$Uuid$toString(node.uuid))),
+				_Utils_Tuple2(
+				'content',
+				elm$json$Json$Encode$string(
+					author$project$JsonTypes$nativeToString(node.content))),
+				_Utils_Tuple2(
+				'value',
+				elm$json$Json$Encode$string(node.value))
+			]));
+};
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var author$project$JsonTypes$nodeListToJson = function (list) {
+	return A2(elm$json$Json$Encode$list, author$project$JsonTypes$nodeToJson, list);
+};
 var elm$core$String$fromFloat = _String_fromNumber;
 var author$project$Coordinate$toSvgString = function (xy) {
 	return elm$core$String$fromFloat(xy.x) + (',' + elm$core$String$fromFloat(xy.y));
@@ -6251,6 +6505,30 @@ var author$project$SvgPolygon$view = function (model) {
 			]));
 };
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$textarea = _VirtualDom_node('textarea');
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
+var author$project$ViewJson$view = function (string) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$textarea,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$value(string)
+					]),
+				_List_Nil)
+			]));
+};
 var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (model) {
@@ -6267,7 +6545,12 @@ var author$project$Main$view = function (model) {
 				A2(
 				elm$html$Html$map,
 				author$project$MsgRouter$SvgPolygonMsg(2),
-				author$project$SvgPolygon$view(model.svgPolygonModel2))
+				author$project$SvgPolygon$view(model.svgPolygonModel2)),
+				author$project$ViewJson$view(
+				A2(
+					elm$json$Json$Encode$encode,
+					2,
+					author$project$JsonTypes$nodeListToJson(author$project$JsonTypes$initialNodes)))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

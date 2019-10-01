@@ -1,4 +1,4 @@
-module JsonTypes exposing (Node)
+module JsonTypes exposing (Node, initialNodes, nodeListToJson)
 
 import List
 import Uuid
@@ -21,6 +21,7 @@ type alias Node =
   , value: String
   }
 
+nodeToJson: Node -> Json.Encode.Value
 nodeToJson node =
   Json.Encode.object
     [
@@ -28,6 +29,11 @@ nodeToJson node =
     , ("content" , ( Json.Encode.string (nativeToString node.content) ))
     , ("value" , ( Json.Encode.string node.value ))
     ]
+
+nodeListToJson: List Node -> Json.Encode.Value
+nodeListToJson list = 
+  Json.Encode.list nodeToJson list
+
 
 type alias NodesList = List Node
 
@@ -38,23 +44,43 @@ type alias Connection =
   , name: String
   }
 
+connectionToJson: Connection -> Json.Encode.Value
+connectionToJson connection =
+  Json.Encode.object
+    [
+      ("from" , ( Json.Encode.string (Uuid.toString connection.from) ))
+    , ("to" , ( Json.Encode.string (Uuid.toString connection.to) ))
+    , ("name" , ( Json.Encode.string connection.name ))
+    ]
+
 type alias ConnectionsList = List Connection
 
+initialNodes: NodesList
 initialNodes = 
   let
-    uuidFromString = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e6"  
+    uuidFromString = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e6"
+    uuidFromString2 = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e7"  
   in
     case uuidFromString of 
       Nothing -> 
         []
       Just uuid ->
-        [
-          {
-            uuid = uuid
-          , content = Svg
-          , value = ""
-          }
-        ]
+        case uuidFromString2 of
+          Nothing -> 
+            []
+          Just uuid2 ->
+            [
+              {
+                uuid = uuid
+              , content = Svg
+              , value = ""
+              },
+              {
+                uuid = uuid2
+              , content = Polygon
+              , value = ""
+              }
+            ]
 
 initialConnectionsList = []
 

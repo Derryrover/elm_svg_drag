@@ -1,13 +1,9 @@
-module ViewJson exposing (a)
+module ViewJson exposing (view)
 
-import Html exposing (Html, div, text, input)
+import Html exposing (Html, div, text, input, textarea)
 import Html.Attributes exposing (style, class,value)
 
 type alias Model = String
-
-
-a = 1
-
 
 
 view: Model -> Html a
@@ -15,5 +11,5 @@ view string =
   div 
     [] 
     [
-      input [value string] [] 
+      textarea [value string] [] 
     ]
