@@ -6006,8 +6006,6 @@ var author$project$Main$update = F2(
 				A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand));
 		}
 	});
-var author$project$JsonTypes$Polygon = {$: 'Polygon'};
-var author$project$JsonTypes$Svg = {$: 'Svg'};
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -6043,6 +6041,26 @@ var danyx23$elm_uuid$Uuid$fromString = function (text) {
 		danyx23$elm_uuid$Uuid$Uuid(
 			elm$core$String$toLower(text))) : elm$core$Maybe$Nothing;
 };
+var author$project$JsonTypes$initialConnectionsList = function () {
+	var uuidFromString2 = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e7');
+	var uuidFromString = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e6');
+	if (uuidFromString.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		var uuid = uuidFromString.a;
+		if (uuidFromString2.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var uuid2 = uuidFromString2.a;
+			return _List_fromArray(
+				[
+					{from: uuid, name: '', to: uuid2}
+				]);
+		}
+	}
+}();
+var author$project$JsonTypes$Polygon = {$: 'Polygon'};
+var author$project$JsonTypes$Svg = {$: 'Svg'};
 var author$project$JsonTypes$initialNodes = function () {
 	var uuidFromString2 = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e7');
 	var uuidFromString = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e6');
@@ -6062,6 +6080,50 @@ var author$project$JsonTypes$initialNodes = function () {
 		}
 	}
 }();
+var author$project$JsonTypes$nodesAndConnections = {connections: author$project$JsonTypes$initialConnectionsList, nodes: author$project$JsonTypes$initialNodes};
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$JsonTypes$connectionToJson = function (connection) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'from',
+				elm$json$Json$Encode$string(
+					danyx23$elm_uuid$Uuid$toString(connection.from))),
+				_Utils_Tuple2(
+				'to',
+				elm$json$Json$Encode$string(
+					danyx23$elm_uuid$Uuid$toString(connection.to))),
+				_Utils_Tuple2(
+				'name',
+				elm$json$Json$Encode$string(connection.name))
+			]));
+};
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var author$project$JsonTypes$connectionListToJson = function (list) {
+	return A2(elm$json$Json$Encode$list, author$project$JsonTypes$connectionToJson, list);
+};
 var author$project$JsonTypes$nativeToString = function (_native) {
 	switch (_native.$) {
 		case 'Circle':
@@ -6116,20 +6178,6 @@ var author$project$JsonTypes$nativeToString = function (_native) {
 			return 'values';
 	}
 };
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var elm$json$Json$Encode$string = _Json_wrap;
 var author$project$JsonTypes$nodeToJson = function (node) {
 	return elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -6147,17 +6195,20 @@ var author$project$JsonTypes$nodeToJson = function (node) {
 				elm$json$Json$Encode$string(node.value))
 			]));
 };
-var elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
 var author$project$JsonTypes$nodeListToJson = function (list) {
 	return A2(elm$json$Json$Encode$list, author$project$JsonTypes$nodeToJson, list);
+};
+var author$project$JsonTypes$nodesAndConnectionsToJson = function (nodesPlusConn) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'connections',
+				author$project$JsonTypes$connectionListToJson(nodesPlusConn.connections)),
+				_Utils_Tuple2(
+				'nodes',
+				author$project$JsonTypes$nodeListToJson(nodesPlusConn.nodes))
+			]));
 };
 var elm$core$String$fromFloat = _String_fromNumber;
 var author$project$Coordinate$toSvgString = function (xy) {
@@ -6550,7 +6601,7 @@ var author$project$Main$view = function (model) {
 				A2(
 					elm$json$Json$Encode$encode,
 					2,
-					author$project$JsonTypes$nodeListToJson(author$project$JsonTypes$initialNodes)))
+					author$project$JsonTypes$nodesAndConnectionsToJson(author$project$JsonTypes$nodesAndConnections)))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

@@ -1,4 +1,4 @@
-module JsonTypes exposing (Node, initialNodes, nodeListToJson)
+module JsonTypes exposing (Node, initialNodes, nodeListToJson, nodesAndConnections, nodesAndConnectionsToJson)
 
 import List
 import Uuid
@@ -53,6 +53,10 @@ connectionToJson connection =
     , ("name" , ( Json.Encode.string connection.name ))
     ]
 
+connectionListToJson: List Connection -> Json.Encode.Value
+connectionListToJson list = 
+  Json.Encode.list connectionToJson list
+
 type alias ConnectionsList = List Connection
 
 initialNodes: NodesList
@@ -82,13 +86,40 @@ initialNodes =
               }
             ]
 
-initialConnectionsList = []
+initialConnectionsList: ConnectionsList
+initialConnectionsList = 
+  let
+    uuidFromString = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e6"
+    uuidFromString2 = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e7"  
+  in
+    case uuidFromString of 
+      Nothing -> 
+        []
+      Just uuid ->
+        case uuidFromString2 of
+          Nothing -> 
+            []
+          Just uuid2 ->
+            [
+              {
+                from = uuid
+              , to = uuid2
+              , name = ""
+              }
+            ]
 
 nodesAndConnections = 
   {
     nodes = initialNodes
   , connections = initialConnectionsList 
   }
+
+nodesAndConnectionsToJson nodesPlusConn = 
+   Json.Encode.object
+    [
+      ("connections" , ( connectionListToJson (nodesPlusConn.connections) ))
+    , ("nodes" , ( nodeListToJson (nodesPlusConn.nodes) ))
+    ]
 
 -- natives  should have all a procedure for the compiler to stringify them
 -- for these svg elements this will be by using functions in the standard elm Svg library

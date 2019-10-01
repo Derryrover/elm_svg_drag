@@ -61,7 +61,7 @@ view model =
       Html.map (SvgPolygonMsg 1) (SvgPolygon.view model.svgPolygonModel1)
     , SvgAnimationView.view model.svgPolygonModel1 model.svgPolygonModel2
     , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)
-    , ViewJson.view ( Json.Encode.encode 2  (JsonTypes.nodeListToJson JsonTypes.initialNodes))--("1234")    
+    , ViewJson.view ( Json.Encode.encode 2  (JsonTypes.nodesAndConnectionsToJson JsonTypes.nodesAndConnections))--("1234")    
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
