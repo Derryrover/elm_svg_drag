@@ -22,7 +22,10 @@ import SvgTypes exposing (Viewbox)
 import MsgRouter exposing(Msg(..), Model)
 
 import ViewJson
-import JsonTypes
+-- import JsonTypes
+-- import ParseJson
+import GraphInitialValues
+import GraphTypesToJson
 import Json.Encode
 
 
@@ -61,7 +64,7 @@ view model =
       Html.map (SvgPolygonMsg 1) (SvgPolygon.view model.svgPolygonModel1)
     , SvgAnimationView.view model.svgPolygonModel1 model.svgPolygonModel2
     , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)
-    , ViewJson.view ( Json.Encode.encode 2  (JsonTypes.nodesAndConnectionsToJson JsonTypes.nodesAndConnections))--("1234")    
+    , ViewJson.view ( Json.Encode.encode 2  (GraphTypesToJson.nodesAndConnectionsToJson GraphInitialValues.nodesAndConnections))--("1234")    
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
