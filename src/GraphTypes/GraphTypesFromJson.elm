@@ -1,4 +1,4 @@
-module ParseJson exposing (jsonNodesAndConnectionsDecode)
+module GraphTypesFromJson exposing (jsonNodesAndConnectionsDecode)
 
 import Json.Decode
 import GraphTypes

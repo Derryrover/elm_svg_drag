@@ -5,11 +5,13 @@ import UuidGenerator exposing(Msg(..))
 
 import Html
 import Maybe
+import GraphModel
 
 type alias Model = 
   { svgPolygonModel1 : SvgPolygon.Model
   , svgPolygonModel2 : SvgPolygon.Model 
   , uuidGeneratorModel : UuidGenerator.Model
+  , graphModel: GraphModel.Model
   }
 
 type alias MaybeModel = 
@@ -18,6 +20,7 @@ type alias MaybeModel =
 type Msg 
   = SvgPolygonMsg Int SvgPolygon.Msg
   | UuidGeneratorMsg UuidGenerator.Msg
+  | GraphModelMsg GraphModel.Msg
 
 reconstructMainMsg: Msg -> Model -> (MaybeModel, Msg)
 reconstructMainMsg msg model = 
