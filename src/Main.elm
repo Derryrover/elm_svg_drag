@@ -28,6 +28,7 @@ import GraphInitialValues
 import GraphTypesToJson
 import Json.Encode
 import GraphModel
+import GraphToRosetree
 
 
 main = Browser.element

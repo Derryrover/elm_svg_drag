@@ -11,9 +11,13 @@ type alias Node =
     -- for now content is a native
     -- lateron it might be possible that content is a function composed from natives (thus itself not a true native)
     -- for this svg editor this might not be applicable
-  , content: Native
+  , content: GraphContent
   , value: String
   }
+
+-- expose Native type via this module so no explicit import is needed in other modules like GraphToRosetree.elm
+-- unfortuanedly this doesnot work when exposing the different values like Svg is needed, bummer
+type alias GraphContent = Native
 
 type alias NodesList = List Node
 
