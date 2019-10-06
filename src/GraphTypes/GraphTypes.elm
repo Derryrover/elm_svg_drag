@@ -12,7 +12,7 @@ type alias Node =
     -- lateron it might be possible that content is a function composed from natives (thus itself not a true native)
     -- for this svg editor this might not be applicable
   , content: GraphContent
-  , value: String
+  , value: String --not clear what this is actually. Do we need it later ?
   }
 
 -- expose Native type via this module so no explicit import is needed in other modules like GraphToRosetree.elm
