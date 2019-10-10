@@ -29,6 +29,7 @@ import GraphTypesToJson
 import Json.Encode
 import GraphModel
 import GraphToRosetree
+import IdRoseTreeDisplay
 
 
 main = Browser.element

@@ -54,22 +54,38 @@ graphToTree: NodesAndConnections -> Maybe TreeFromNodes
 graphToTree nodesAndConnections =
   let
     maybeRoot = getRoot nodesAndConnections
-    maybeRootContent = 
+    -- maybeRootContent = 
+    --   case maybeRoot of 
+    --     Just root ->
+    --       Just 
+    --         (TreeItemFromNode 
+    --           root.uuid
+    --          "root_svg"
+    --           Svg
+    --         )
+    --     Nothing -> Nothing
+    -- fake connection to make tree
+    maybeFakeConnection = 
       case maybeRoot of 
+        Nothing ->
+          Nothing
         Just root ->
-          Just 
-            (TreeItemFromNode 
-              root.uuid
-             "root_svg"
-              Svg
-            )
-        Nothing -> Nothing
+          Just {
+            to = root.uuid
+          , from = root.uuid
+          , name = "root"
+          }
   in
-    case maybeRootContent of
-      Just rootContent ->
-        Just (Tree.singleton rootContent)
+    -- case maybeRootContent of
+    --   Just rootContent ->
+    --     Just (Tree.singleton rootContent)
+    --   Nothing ->
+    --     Nothing
+    case maybeFakeConnection of 
       Nothing ->
         Nothing
+      Just connection ->
+        graphToTreeRecursiveHelper connection nodesAndConnections
 
 graphToTreeRecursiveHelper: Connection -> NodesAndConnections -> Maybe TreeFromNodes
 graphToTreeRecursiveHelper connection nodesAndConnections =

@@ -9,3 +9,5 @@ createStyleList list = map (\(key,value) -> (style key value)) list
 
 intToPxString : Int -> String
 intToPxString int = (String.fromInt int) ++ "px"
+
+elmClass = "elm_class"
