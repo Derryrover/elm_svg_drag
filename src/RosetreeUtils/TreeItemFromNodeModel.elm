@@ -7,13 +7,13 @@ import List
 import Uuid
 import NativeTypes exposing (Native(..)) 
 
-import Html exposing (Html, div, button, label, text, input, textarea, span)
-import Html.Attributes exposing (style, class,value)
+import Html exposing (Html, div, button, label, text, input, textarea, span, select, option)
+import Html.Attributes exposing (style, class, value, selected)
 import Html.Events exposing (onInput, onClick)
 
 type alias Model = Maybe GraphToRosetree.TreeItemFromNode
 
-type Msg = UpdateName | UpdateContent
+type Msg = UpdateName String | UpdateContent String
 
 init: Model
 init = 
@@ -43,22 +43,67 @@ view model =
             [] 
             [
               label [] [text "uuid"]
-            , span [] [ text ""]
+            , span [] [ text (Uuid.toString item.uuid)]
             ]
         , div 
             [] 
             [
               label [] [text "name"]
-            , input [] [text item.name]
+            , input 
+              [ 
+                value item.name
+              , onInput UpdateName
+              ] 
+              []
+              , text item.name
             ]
         , div 
             [] 
             [
               label [] [text "content"]
-            , input [] [text (NativeTypes.nativeToString item.content)]
+            -- , input 
+            --   [
+            --     value (NativeTypes.nativeToString item.content)
+            --   , onInput UpdateContent
+            --   ] 
+            --   []
+            , select 
+              [
+                onInput UpdateContent
+              ]
+              (List.map 
+                -- (\native -> (option [] [text (NativeTypes.nativeToString native)])) 
+                (optionFromNative item.content)
+                NativeTypes.natives  
+              )
+            , text (NativeTypes.nativeToString item.content)     
             ]
         ]
 
+optionFromNative: NativeTypes.Native -> NativeTypes.Native -> Html Msg
+optionFromNative selected native = 
+  let
+    str = NativeTypes.nativeToString native
+  in
+    option 
+      [
+        value str
+      , Html.Attributes.selected (selected == native)  
+      ] 
+      [
+        text str
+      ]
+
 update: Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  (model, Cmd.none)
+  case model of 
+    Nothing ->
+      (model, Cmd.none)
+    Just treeItem ->
+      case msg of 
+        UpdateContent contentStr ->
+          (Just {treeItem | content = NativeTypes.stringToNative contentStr} , Cmd.none)
+          -- (Just treeItem , Cmd.none)
+        UpdateName name ->
+          (Just { treeItem | name = name } , Cmd.none)
+

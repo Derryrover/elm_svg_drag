@@ -5339,6 +5339,16 @@ var author$project$SvgPolygon$init = _Utils_Tuple2(
 				author$project$MsgToCmd$send(
 				author$project$SvgPolygon$Uuid(elm$core$Maybe$Nothing))
 			])));
+var author$project$TreeItemFromNodeModel$init = function () {
+	var maybeUuid = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e8');
+	if (maybeUuid.$ === 'Nothing') {
+		return elm$core$Maybe$Nothing;
+	} else {
+		var uuid = maybeUuid.a;
+		return elm$core$Maybe$Just(
+			{content: author$project$NativeTypes$Svg, name: 'test tree item', uuid: uuid});
+	}
+}();
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var elm$random$Random$Seed = F2(
@@ -5379,7 +5389,7 @@ var author$project$Main$init = function (seedUuid) {
 	var svgPolygonModel1 = _n2.a;
 	var svgPolygonCommand1 = _n2.b;
 	return _Utils_Tuple2(
-		{graphModel: author$project$GraphModel$init, svgPolygonModel1: svgPolygonModel1, svgPolygonModel2: svgPolygonModel2, uuidGeneratorModel: uuidGeneratorModel},
+		{graphModel: author$project$GraphModel$init, svgPolygonModel1: svgPolygonModel1, svgPolygonModel2: svgPolygonModel2, treeItemTest: author$project$TreeItemFromNodeModel$init, uuidGeneratorModel: uuidGeneratorModel},
 		elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
@@ -5588,6 +5598,9 @@ var author$project$GraphModel$update = F2(
 	});
 var author$project$MsgRouter$GraphModelMsg = function (a) {
 	return {$: 'GraphModelMsg', a: a};
+};
+var author$project$MsgRouter$TreeItemTestMsg = function (a) {
+	return {$: 'TreeItemTestMsg', a: a};
 };
 var author$project$UuidGenerator$NewUuid = {$: 'NewUuid'};
 var elm$core$Bitwise$and = _Bitwise_and;
@@ -6351,17 +6364,44 @@ var author$project$SvgPolygon$update = F2(
 				}
 		}
 	});
+var author$project$TreeItemFromNodeModel$update = F2(
+	function (msg, model) {
+		if (model.$ === 'Nothing') {
+			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		} else {
+			var treeItem = model.a;
+			if (msg.$ === 'UpdateContent') {
+				var contentStr = msg.a;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Just(
+						_Utils_update(
+							treeItem,
+							{
+								content: author$project$NativeTypes$stringToNative(contentStr)
+							})),
+					elm$core$Platform$Cmd$none);
+			} else {
+				var name = msg.a;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Just(
+						_Utils_update(
+							treeItem,
+							{name: name})),
+					elm$core$Platform$Cmd$none);
+			}
+		}
+	});
 var author$project$Main$update = F2(
 	function (preMsg, model) {
 		var _n0 = A2(author$project$MsgRouter$reconstructMainMsg, preMsg, model);
 		var maybeModel = _n0.a;
 		var msg = _n0.b;
 		var newUuidModel = function () {
-			var _n6 = maybeModel.uuidGeneratorModel;
-			if (_n6.$ === 'Nothing') {
+			var _n7 = maybeModel.uuidGeneratorModel;
+			if (_n7.$ === 'Nothing') {
 				return model.uuidGeneratorModel;
 			} else {
-				var uuidGeneratorModel = _n6.a;
+				var uuidGeneratorModel = _n7.a;
 				return uuidGeneratorModel;
 			}
 		}();
@@ -6404,7 +6444,7 @@ var author$project$Main$update = F2(
 						model,
 						{uuidGeneratorModel: uuidGeneratorModel}),
 					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$UuidGeneratorMsg, uuidGeneratorCommand));
-			default:
+			case 'GraphModelMsg':
 				var graphModelMsg = msg.a;
 				var _n5 = A2(author$project$GraphModel$update, graphModelMsg, model.graphModel);
 				var graphModel = _n5.a;
@@ -6414,6 +6454,16 @@ var author$project$Main$update = F2(
 						model,
 						{graphModel: graphModel}),
 					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$GraphModelMsg, graphModelCommand));
+			default:
+				var treeItemFromNodeModelMsg = msg.a;
+				var _n6 = A2(author$project$TreeItemFromNodeModel$update, treeItemFromNodeModelMsg, model.treeItemTest);
+				var treeItemTest = _n6.a;
+				var treeItemTestCommand = _n6.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{treeItemTest: treeItemTest}),
+					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$TreeItemTestMsg, treeItemTestCommand));
 		}
 	});
 var author$project$GraphModel$FromJson = {$: 'FromJson'};
@@ -6846,6 +6896,131 @@ var author$project$SvgPolygon$view = function (model) {
 						])))
 			]));
 };
+var author$project$NativeTypes$natives = _List_fromArray(
+	[author$project$NativeTypes$Circle, author$project$NativeTypes$Line, author$project$NativeTypes$Svg, author$project$NativeTypes$G, author$project$NativeTypes$Polygon, author$project$NativeTypes$Text_, author$project$NativeTypes$Text, author$project$NativeTypes$Animate, author$project$NativeTypes$ViewBox, author$project$NativeTypes$Width, author$project$NativeTypes$Height, author$project$NativeTypes$Fill, author$project$NativeTypes$Points, author$project$NativeTypes$R, author$project$NativeTypes$Cx, author$project$NativeTypes$Cy, author$project$NativeTypes$X, author$project$NativeTypes$Y, author$project$NativeTypes$FillOpacity, author$project$NativeTypes$Begin, author$project$NativeTypes$AttributeName, author$project$NativeTypes$Dur, author$project$NativeTypes$To, author$project$NativeTypes$RepeatCount, author$project$NativeTypes$Values]);
+var author$project$TreeItemFromNodeModel$UpdateContent = function (a) {
+	return {$: 'UpdateContent', a: a};
+};
+var author$project$TreeItemFromNodeModel$UpdateName = function (a) {
+	return {$: 'UpdateName', a: a};
+};
+var elm$html$Html$option = _VirtualDom_node('option');
+var elm$json$Json$Encode$bool = _Json_wrap;
+var elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$bool(bool));
+	});
+var elm$html$Html$Attributes$selected = elm$html$Html$Attributes$boolProperty('selected');
+var author$project$TreeItemFromNodeModel$optionFromNative = F2(
+	function (selected, _native) {
+		var str = author$project$NativeTypes$nativeToString(_native);
+		return A2(
+			elm$html$Html$option,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$value(str),
+					elm$html$Html$Attributes$selected(
+					_Utils_eq(selected, _native))
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text(str)
+				]));
+	});
+var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
+var elm$html$Html$select = _VirtualDom_node('select');
+var elm$html$Html$span = _VirtualDom_node('span');
+var author$project$TreeItemFromNodeModel$view = function (model) {
+	if (model.$ === 'Nothing') {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					elm$html$Html$text('No item found')
+				]));
+	} else {
+		var item = model.a;
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('uuid')
+								])),
+							A2(
+							elm$html$Html$span,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									danyx23$elm_uuid$Uuid$toString(item.uuid))
+								]))
+						])),
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('name')
+								])),
+							A2(
+							elm$html$Html$input,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$value(item.name),
+									elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateName)
+								]),
+							_List_Nil),
+							elm$html$Html$text(item.name)
+						])),
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('content')
+								])),
+							A2(
+							elm$html$Html$select,
+							_List_fromArray(
+								[
+									elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateContent)
+								]),
+							A2(
+								elm$core$List$map,
+								author$project$TreeItemFromNodeModel$optionFromNative(item.content),
+								author$project$NativeTypes$natives)),
+							elm$html$Html$text(
+							author$project$NativeTypes$nativeToString(item.content))
+						]))
+				]));
+	}
+};
 var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (model) {
@@ -6866,7 +7041,11 @@ var author$project$Main$view = function (model) {
 				A2(
 				elm$html$Html$map,
 				author$project$MsgRouter$GraphModelMsg,
-				author$project$GraphModel$view(model.graphModel))
+				author$project$GraphModel$view(model.graphModel)),
+				A2(
+				elm$html$Html$map,
+				author$project$MsgRouter$TreeItemTestMsg,
+				author$project$TreeItemFromNodeModel$view(model.treeItemTest))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

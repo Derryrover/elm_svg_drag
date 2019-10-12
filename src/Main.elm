@@ -30,6 +30,7 @@ import Json.Encode
 import GraphModel
 import GraphToRosetree
 import IdRoseTreeDisplay
+import TreeItemFromNodeModel
 
 
 main = Browser.element
@@ -51,6 +52,7 @@ init seedUuid =
         , svgPolygonModel2 = svgPolygonModel2  
         , uuidGeneratorModel = uuidGeneratorModel
         , graphModel = GraphModel.init
+        , treeItemTest = TreeItemFromNodeModel.init
         }
       , Cmd.batch 
         [ Cmd.map (SvgPolygonMsg 1) svgPolygonCommand1
@@ -69,7 +71,8 @@ view model =
     , SvgAnimationView.view model.svgPolygonModel1 model.svgPolygonModel2
     , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)
     -- , ViewJson.view ( Json.Encode.encode 2  (GraphTypesToJson.nodesAndConnectionsToJson GraphInitialValues.nodesAndConnections))--("1234")
-    , Html.map GraphModelMsg (GraphModel.view model.graphModel )    
+    , Html.map GraphModelMsg (GraphModel.view model.graphModel )
+    , Html.map TreeItemTestMsg (TreeItemFromNodeModel.view model.treeItemTest)    
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -101,6 +104,9 @@ update preMsg model =
       GraphModelMsg graphModelMsg -> 
         let (graphModel, graphModelCommand) = GraphModel.update graphModelMsg model.graphModel
         in ( { model | graphModel = graphModel }, Cmd.map GraphModelMsg graphModelCommand)
+      TreeItemTestMsg treeItemFromNodeModelMsg ->
+        let (treeItemTest, treeItemTestCommand)= TreeItemFromNodeModel.update treeItemFromNodeModelMsg model.treeItemTest
+        in ( { model | treeItemTest = treeItemTest }, Cmd.map TreeItemTestMsg treeItemTestCommand)
 
 
 subscriptions : Model -> Sub Msg
