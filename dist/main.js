@@ -4622,10 +4622,9 @@ var author$project$GraphInitialValues$initialNodes = function () {
 	}
 }();
 var author$project$GraphInitialValues$nodesAndConnections = {connections: author$project$GraphInitialValues$initialConnectionsList, nodes: author$project$GraphInitialValues$initialNodes};
-var danyx23$elm_uuid$Uuid$toString = function (_n0) {
-	var internalString = _n0.a;
-	return internalString;
-};
+var elm$core$Basics$eq = _Utils_equal;
+var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$gt = _Utils_gt;
 var elm$core$List$foldl = F3(
 	function (func, acc, list) {
 		foldl:
@@ -4645,6 +4644,206 @@ var elm$core$List$foldl = F3(
 			}
 		}
 	});
+var elm$core$List$reverse = function (list) {
+	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
+};
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$GraphToRosetree$getRoot = function (nodesAndConnections) {
+	var nodesList = nodesAndConnections.nodes;
+	var svgItemList = A2(
+		elm$core$List$filter,
+		function (treeItemFromNode) {
+			return _Utils_eq(treeItemFromNode.content, author$project$NativeTypes$Svg);
+		},
+		nodesList);
+	return elm$core$List$head(svgItemList);
+};
+var author$project$GraphToRosetree$getConnectionsFromUuid = F2(
+	function (uuid, connections) {
+		return A2(
+			elm$core$List$filter,
+			function (connection) {
+				return _Utils_eq(connection.from, uuid);
+			},
+			connections);
+	});
+var author$project$GraphToRosetree$getNodeFromConnection = F2(
+	function (connection, nodes) {
+		var uuid = connection.to;
+		var nodeList = A2(
+			elm$core$List$filter,
+			function (node) {
+				return _Utils_eq(node.uuid, uuid);
+			},
+			nodes);
+		return elm$core$List$head(nodeList);
+	});
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (_n0.$ === 'Just') {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var zwilias$elm_rosetree$Tree$Tree = F2(
+	function (a, b) {
+		return {$: 'Tree', a: a, b: b};
+	});
+var zwilias$elm_rosetree$Tree$tree = zwilias$elm_rosetree$Tree$Tree;
+var author$project$GraphToRosetree$graphToTreeRecursiveHelper = F2(
+	function (connection, nodesAndConnections) {
+		var maybeNode = A2(author$project$GraphToRosetree$getNodeFromConnection, connection, nodesAndConnections.nodes);
+		var maybeCurrentItem = function () {
+			if (maybeNode.$ === 'Nothing') {
+				return elm$core$Maybe$Nothing;
+			} else {
+				var node = maybeNode.a;
+				return elm$core$Maybe$Just(
+					{content: node.content, name: connection.name, uuid: node.uuid});
+			}
+		}();
+		var currentChildrenConnections = A2(author$project$GraphToRosetree$getConnectionsFromUuid, connection.to, nodesAndConnections.connections);
+		var maybeTreeChildren = A2(
+			elm$core$List$map,
+			function (conn) {
+				return A2(author$project$GraphToRosetree$graphToTreeRecursiveHelper, conn, nodesAndConnections);
+			},
+			currentChildrenConnections);
+		var treeChildren = A2(
+			elm$core$List$filterMap,
+			function (maybeTreeChild) {
+				return maybeTreeChild;
+			},
+			maybeTreeChildren);
+		if (maybeCurrentItem.$ === 'Nothing') {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var currentItem = maybeCurrentItem.a;
+			return elm$core$Maybe$Just(
+				A2(zwilias$elm_rosetree$Tree$tree, currentItem, treeChildren));
+		}
+	});
+var author$project$GraphToRosetree$graphToTree = function (nodesAndConnections) {
+	var maybeRoot = author$project$GraphToRosetree$getRoot(nodesAndConnections);
+	var maybeFakeConnection = function () {
+		if (maybeRoot.$ === 'Nothing') {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var root = maybeRoot.a;
+			return elm$core$Maybe$Just(
+				{from: root.uuid, name: 'root', to: root.uuid});
+		}
+	}();
+	if (maybeFakeConnection.$ === 'Nothing') {
+		return elm$core$Maybe$Nothing;
+	} else {
+		var connection = maybeFakeConnection.a;
+		return A2(author$project$GraphToRosetree$graphToTreeRecursiveHelper, connection, nodesAndConnections);
+	}
+};
+var danyx23$elm_uuid$Uuid$toString = function (_n0) {
+	var internalString = _n0.a;
+	return internalString;
+};
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
@@ -4668,9 +4867,6 @@ var elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$List$reverse = function (list) {
-	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
-};
 var elm$core$Array$compressNodes = F2(
 	function (nodes, acc) {
 		compressNodes:
@@ -4693,7 +4889,6 @@ var elm$core$Array$compressNodes = F2(
 			}
 		}
 	});
-var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Tuple$first = function (_n0) {
 	var x = _n0.a;
 	return x;
@@ -4714,9 +4909,7 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
-var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$floor = _Basics_floor;
-var elm$core$Basics$gt = _Utils_gt;
 var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
@@ -5142,8 +5335,19 @@ var author$project$GraphModel$init = {
 	jsonString: A2(
 		elm$json$Json$Encode$encode,
 		2,
-		author$project$GraphTypesToJson$nodesAndConnectionsToJson(author$project$GraphInitialValues$nodesAndConnections))
+		author$project$GraphTypesToJson$nodesAndConnectionsToJson(author$project$GraphInitialValues$nodesAndConnections)),
+	maybeTree: author$project$GraphToRosetree$graphToTree(author$project$GraphInitialValues$nodesAndConnections)
 };
+var author$project$MaybeTreeItemFromNodeModel$init = function () {
+	var maybeUuid = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e8');
+	if (maybeUuid.$ === 'Nothing') {
+		return elm$core$Maybe$Nothing;
+	} else {
+		var uuid = maybeUuid.a;
+		return elm$core$Maybe$Just(
+			{content: author$project$NativeTypes$Svg, name: 'test tree item', uuid: uuid});
+	}
+}();
 var author$project$MsgRouter$SvgPolygonMsg = F2(
 	function (a, b) {
 		return {$: 'SvgPolygonMsg', a: a, b: b};
@@ -5156,75 +5360,6 @@ var elm$core$Task$Perform = function (a) {
 };
 var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var elm$core$Task$andThen = _Scheduler_andThen;
 var elm$core$Task$map = F2(
 	function (func, taskA) {
@@ -5339,16 +5474,6 @@ var author$project$SvgPolygon$init = _Utils_Tuple2(
 				author$project$MsgToCmd$send(
 				author$project$SvgPolygon$Uuid(elm$core$Maybe$Nothing))
 			])));
-var author$project$TreeItemFromNodeModel$init = function () {
-	var maybeUuid = danyx23$elm_uuid$Uuid$fromString('74b662d2-a0dc-4e64-9c3e-df54c4c052e8');
-	if (maybeUuid.$ === 'Nothing') {
-		return elm$core$Maybe$Nothing;
-	} else {
-		var uuid = maybeUuid.a;
-		return elm$core$Maybe$Just(
-			{content: author$project$NativeTypes$Svg, name: 'test tree item', uuid: uuid});
-	}
-}();
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var elm$random$Random$Seed = F2(
@@ -5389,7 +5514,7 @@ var author$project$Main$init = function (seedUuid) {
 	var svgPolygonModel1 = _n2.a;
 	var svgPolygonCommand1 = _n2.b;
 	return _Utils_Tuple2(
-		{graphModel: author$project$GraphModel$init, svgPolygonModel1: svgPolygonModel1, svgPolygonModel2: svgPolygonModel2, treeItemTest: author$project$TreeItemFromNodeModel$init, uuidGeneratorModel: uuidGeneratorModel},
+		{graphModel: author$project$GraphModel$init, svgPolygonModel1: svgPolygonModel1, svgPolygonModel2: svgPolygonModel2, treeItemTest: author$project$MaybeTreeItemFromNodeModel$init, uuidGeneratorModel: uuidGeneratorModel},
 		elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
@@ -5596,8 +5721,38 @@ var author$project$GraphModel$update = F2(
 					elm$core$Platform$Cmd$none);
 		}
 	});
+var author$project$MaybeTreeItemFromNodeModel$update = F2(
+	function (msg, model) {
+		if (model.$ === 'Nothing') {
+			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		} else {
+			var treeItem = model.a;
+			if (msg.$ === 'UpdateContent') {
+				var contentStr = msg.a;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Just(
+						_Utils_update(
+							treeItem,
+							{
+								content: author$project$NativeTypes$stringToNative(contentStr)
+							})),
+					elm$core$Platform$Cmd$none);
+			} else {
+				var name = msg.a;
+				return _Utils_Tuple2(
+					elm$core$Maybe$Just(
+						_Utils_update(
+							treeItem,
+							{name: name})),
+					elm$core$Platform$Cmd$none);
+			}
+		}
+	});
 var author$project$MsgRouter$GraphModelMsg = function (a) {
 	return {$: 'GraphModelMsg', a: a};
+};
+var author$project$MsgRouter$Tree = function (a) {
+	return {$: 'Tree', a: a};
 };
 var author$project$MsgRouter$TreeItemTestMsg = function (a) {
 	return {$: 'TreeItemTestMsg', a: a};
@@ -6064,6 +6219,91 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 				msg);
 		}
 	});
+var author$project$RoseTreeDisplay$ItemMsg = F2(
+	function (a, b) {
+		return {$: 'ItemMsg', a: a, b: b};
+	});
+var author$project$TreeItemFromNodeModel$update = F2(
+	function (msg, treeItem) {
+		if (msg.$ === 'UpdateContent') {
+			var contentStr = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					treeItem,
+					{
+						content: author$project$NativeTypes$stringToNative(contentStr)
+					}),
+				elm$core$Platform$Cmd$none);
+		} else {
+			var name = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					treeItem,
+					{name: name}),
+				elm$core$Platform$Cmd$none);
+		}
+	});
+var zwilias$elm_rosetree$Tree$children = function (_n0) {
+	var c = _n0.b;
+	return c;
+};
+var zwilias$elm_rosetree$Tree$label = function (_n0) {
+	var v = _n0.a;
+	return v;
+};
+var author$project$RoseTreeDisplay$update = F2(
+	function (msg, model) {
+		var treeLabel = zwilias$elm_rosetree$Tree$label(model);
+		var uuid = treeLabel.uuid;
+		var children = zwilias$elm_rosetree$Tree$children(model);
+		if (msg.$ === 'ItemMsg') {
+			var uuidMsg = msg.a;
+			var treeItemMsg = msg.b;
+			if (_Utils_eq(uuidMsg, uuid)) {
+				var _n1 = A2(author$project$TreeItemFromNodeModel$update, treeItemMsg, treeLabel);
+				var newTreeItem = _n1.a;
+				var cmd = _n1.b;
+				return _Utils_Tuple2(
+					A2(zwilias$elm_rosetree$Tree$tree, newTreeItem, children),
+					A2(
+						elm$core$Platform$Cmd$map,
+						author$project$RoseTreeDisplay$ItemMsg(uuid),
+						cmd));
+			} else {
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			}
+		} else {
+			var uuidMsg = msg.a;
+			var newMsg = msg.b;
+			if (_Utils_eq(uuidMsg, uuid)) {
+				var listChildrenAndCmd = A2(
+					elm$core$List$map,
+					author$project$RoseTreeDisplay$update(newMsg),
+					children);
+				var newChildren = A2(
+					elm$core$List$map,
+					function (_n3) {
+						var child = _n3.a;
+						var cmd = _n3.b;
+						return child;
+					},
+					listChildrenAndCmd);
+				var newCmd = A2(
+					elm$core$List$map,
+					function (_n2) {
+						var child = _n2.a;
+						var cmd = _n2.b;
+						return cmd;
+					},
+					listChildrenAndCmd);
+				return _Utils_Tuple2(
+					A2(zwilias$elm_rosetree$Tree$tree, treeLabel, newChildren),
+					elm$core$Platform$Cmd$batch(newCmd));
+			} else {
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			}
+		}
+	});
 var author$project$SvgPolygon$GetSvg = function (a) {
 	return {$: 'GetSvg', a: a};
 };
@@ -6364,44 +6604,17 @@ var author$project$SvgPolygon$update = F2(
 				}
 		}
 	});
-var author$project$TreeItemFromNodeModel$update = F2(
-	function (msg, model) {
-		if (model.$ === 'Nothing') {
-			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-		} else {
-			var treeItem = model.a;
-			if (msg.$ === 'UpdateContent') {
-				var contentStr = msg.a;
-				return _Utils_Tuple2(
-					elm$core$Maybe$Just(
-						_Utils_update(
-							treeItem,
-							{
-								content: author$project$NativeTypes$stringToNative(contentStr)
-							})),
-					elm$core$Platform$Cmd$none);
-			} else {
-				var name = msg.a;
-				return _Utils_Tuple2(
-					elm$core$Maybe$Just(
-						_Utils_update(
-							treeItem,
-							{name: name})),
-					elm$core$Platform$Cmd$none);
-			}
-		}
-	});
 var author$project$Main$update = F2(
 	function (preMsg, model) {
 		var _n0 = A2(author$project$MsgRouter$reconstructMainMsg, preMsg, model);
 		var maybeModel = _n0.a;
 		var msg = _n0.b;
 		var newUuidModel = function () {
-			var _n7 = maybeModel.uuidGeneratorModel;
-			if (_n7.$ === 'Nothing') {
+			var _n9 = maybeModel.uuidGeneratorModel;
+			if (_n9.$ === 'Nothing') {
 				return model.uuidGeneratorModel;
 			} else {
-				var uuidGeneratorModel = _n7.a;
+				var uuidGeneratorModel = _n9.a;
 				return uuidGeneratorModel;
 			}
 		}();
@@ -6454,9 +6667,9 @@ var author$project$Main$update = F2(
 						model,
 						{graphModel: graphModel}),
 					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$GraphModelMsg, graphModelCommand));
-			default:
+			case 'TreeItemTestMsg':
 				var treeItemFromNodeModelMsg = msg.a;
-				var _n6 = A2(author$project$TreeItemFromNodeModel$update, treeItemFromNodeModelMsg, model.treeItemTest);
+				var _n6 = A2(author$project$MaybeTreeItemFromNodeModel$update, treeItemFromNodeModelMsg, model.treeItemTest);
 				var treeItemTest = _n6.a;
 				var treeItemTestCommand = _n6.b;
 				return _Utils_Tuple2(
@@ -6464,6 +6677,29 @@ var author$project$Main$update = F2(
 						model,
 						{treeItemTest: treeItemTest}),
 					A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$TreeItemTestMsg, treeItemTestCommand));
+			default:
+				var roseTreeDisplayMsg = msg.a;
+				var _n7 = model.graphModel.maybeTree;
+				if (_n7.$ === 'Nothing') {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					var tree = _n7.a;
+					var graphModel = model.graphModel;
+					var _n8 = A2(author$project$RoseTreeDisplay$update, roseTreeDisplayMsg, tree);
+					var treeModel = _n8.a;
+					var roseTreeCommand = _n8.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								graphModel: _Utils_update(
+									graphModel,
+									{
+										maybeTree: elm$core$Maybe$Just(treeModel)
+									})
+							}),
+						A2(elm$core$Platform$Cmd$map, author$project$MsgRouter$Tree, roseTreeCommand));
+				}
 		}
 	});
 var author$project$GraphModel$FromJson = {$: 'FromJson'};
@@ -6567,6 +6803,308 @@ var author$project$GraphModel$view = function (model) {
 					]),
 				_List_Nil)
 			]));
+};
+var author$project$MaybeTreeItemFromNodeModel$UpdateContent = function (a) {
+	return {$: 'UpdateContent', a: a};
+};
+var author$project$MaybeTreeItemFromNodeModel$UpdateName = function (a) {
+	return {$: 'UpdateName', a: a};
+};
+var elm$html$Html$option = _VirtualDom_node('option');
+var elm$json$Json$Encode$bool = _Json_wrap;
+var elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$bool(bool));
+	});
+var elm$html$Html$Attributes$selected = elm$html$Html$Attributes$boolProperty('selected');
+var author$project$MaybeTreeItemFromNodeModel$optionFromNative = F2(
+	function (selected, _native) {
+		var str = author$project$NativeTypes$nativeToString(_native);
+		return A2(
+			elm$html$Html$option,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$value(str),
+					elm$html$Html$Attributes$selected(
+					_Utils_eq(selected, _native))
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text(str)
+				]));
+	});
+var author$project$NativeTypes$natives = _List_fromArray(
+	[author$project$NativeTypes$Circle, author$project$NativeTypes$Line, author$project$NativeTypes$Svg, author$project$NativeTypes$G, author$project$NativeTypes$Polygon, author$project$NativeTypes$Text_, author$project$NativeTypes$Text, author$project$NativeTypes$Animate, author$project$NativeTypes$ViewBox, author$project$NativeTypes$Width, author$project$NativeTypes$Height, author$project$NativeTypes$Fill, author$project$NativeTypes$Points, author$project$NativeTypes$R, author$project$NativeTypes$Cx, author$project$NativeTypes$Cy, author$project$NativeTypes$X, author$project$NativeTypes$Y, author$project$NativeTypes$FillOpacity, author$project$NativeTypes$Begin, author$project$NativeTypes$AttributeName, author$project$NativeTypes$Dur, author$project$NativeTypes$To, author$project$NativeTypes$RepeatCount, author$project$NativeTypes$Values]);
+var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
+var elm$html$Html$select = _VirtualDom_node('select');
+var elm$html$Html$span = _VirtualDom_node('span');
+var author$project$MaybeTreeItemFromNodeModel$view = function (model) {
+	if (model.$ === 'Nothing') {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					elm$html$Html$text('No item found')
+				]));
+	} else {
+		var item = model.a;
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('uuid')
+								])),
+							A2(
+							elm$html$Html$span,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									danyx23$elm_uuid$Uuid$toString(item.uuid))
+								]))
+						])),
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('name')
+								])),
+							A2(
+							elm$html$Html$input,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$value(item.name),
+									elm$html$Html$Events$onInput(author$project$MaybeTreeItemFromNodeModel$UpdateName)
+								]),
+							_List_Nil),
+							elm$html$Html$text(item.name)
+						])),
+					A2(
+					elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('content')
+								])),
+							A2(
+							elm$html$Html$select,
+							_List_fromArray(
+								[
+									elm$html$Html$Events$onInput(author$project$MaybeTreeItemFromNodeModel$UpdateContent)
+								]),
+							A2(
+								elm$core$List$map,
+								author$project$MaybeTreeItemFromNodeModel$optionFromNative(item.content),
+								author$project$NativeTypes$natives)),
+							elm$html$Html$text(
+							author$project$NativeTypes$nativeToString(item.content))
+						]))
+				]));
+	}
+};
+var author$project$RoseTreeDisplay$Direction = F2(
+	function (a, b) {
+		return {$: 'Direction', a: a, b: b};
+	});
+var author$project$ElmStyle$elmClass = 'elm_class';
+var author$project$RoseTreeDisplay$getListItemClassNames = function (depth) {
+	return 'depth_rosetree_' + (elm$core$String$fromInt(depth) + (' li_rosetree ' + author$project$ElmStyle$elmClass));
+};
+var author$project$RoseTreeDisplay$getOrderedListClassNames = function (depth) {
+	return 'depth_rosetree_' + (elm$core$String$fromInt(depth) + (' ol_rosetree ' + author$project$ElmStyle$elmClass));
+};
+var author$project$RoseTreeDisplay$itemContainerClassNames = 'itemcontainer_rosetree ' + author$project$ElmStyle$elmClass;
+var author$project$TreeItemFromNodeModel$UpdateContent = function (a) {
+	return {$: 'UpdateContent', a: a};
+};
+var author$project$TreeItemFromNodeModel$UpdateName = function (a) {
+	return {$: 'UpdateName', a: a};
+};
+var author$project$TreeItemFromNodeModel$optionFromNative = F2(
+	function (selected, _native) {
+		var str = author$project$NativeTypes$nativeToString(_native);
+		return A2(
+			elm$html$Html$option,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$value(str),
+					elm$html$Html$Attributes$selected(
+					_Utils_eq(selected, _native))
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text(str)
+				]));
+	});
+var author$project$TreeItemFromNodeModel$view = function (item) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('uuid')
+							])),
+						A2(
+						elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text(
+								danyx23$elm_uuid$Uuid$toString(item.uuid))
+							]))
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('name')
+							])),
+						A2(
+						elm$html$Html$input,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$value(item.name),
+								elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateName)
+							]),
+						_List_Nil),
+						elm$html$Html$text(item.name)
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('content')
+							])),
+						A2(
+						elm$html$Html$select,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateContent)
+							]),
+						A2(
+							elm$core$List$map,
+							author$project$TreeItemFromNodeModel$optionFromNative(item.content),
+							author$project$NativeTypes$natives)),
+						elm$html$Html$text(
+						author$project$NativeTypes$nativeToString(item.content))
+					]))
+			]));
+};
+var elm$html$Html$li = _VirtualDom_node('li');
+var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
+var elm$html$Html$ol = _VirtualDom_node('ol');
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var author$project$RoseTreeDisplay$recursiveView = F2(
+	function (depth, treeModel) {
+		var treeLabel = zwilias$elm_rosetree$Tree$label(treeModel);
+		var uuid = treeLabel.uuid;
+		var children = zwilias$elm_rosetree$Tree$children(treeModel);
+		return A2(
+			elm$html$Html$li,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class(
+					author$project$RoseTreeDisplay$getListItemClassNames(depth))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class(author$project$RoseTreeDisplay$itemContainerClassNames)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$map,
+							author$project$RoseTreeDisplay$ItemMsg(uuid),
+							author$project$TreeItemFromNodeModel$view(treeLabel))
+						])),
+					A2(
+					elm$html$Html$ol,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class(
+							author$project$RoseTreeDisplay$getOrderedListClassNames(depth))
+						]),
+					A2(
+						elm$core$List$map,
+						function (child) {
+							return A2(
+								elm$html$Html$map,
+								author$project$RoseTreeDisplay$Direction(uuid),
+								A2(author$project$RoseTreeDisplay$recursiveView, depth + 1, child));
+						},
+						children))
+				]));
+	});
+var author$project$RoseTreeDisplay$view = function (model) {
+	return A2(author$project$RoseTreeDisplay$recursiveView, 0, model);
+};
+var author$project$RoseTreeDisplay$maybeViewHelper = function (maybeModel) {
+	if (maybeModel.$ === 'Nothing') {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					elm$html$Html$text('no model')
+				]));
+	} else {
+		var tree = maybeModel.a;
+		return author$project$RoseTreeDisplay$view(tree);
+	}
 };
 var elm$core$String$fromFloat = _String_fromNumber;
 var author$project$Coordinate$toSvgString = function (xy) {
@@ -6896,133 +7434,6 @@ var author$project$SvgPolygon$view = function (model) {
 						])))
 			]));
 };
-var author$project$NativeTypes$natives = _List_fromArray(
-	[author$project$NativeTypes$Circle, author$project$NativeTypes$Line, author$project$NativeTypes$Svg, author$project$NativeTypes$G, author$project$NativeTypes$Polygon, author$project$NativeTypes$Text_, author$project$NativeTypes$Text, author$project$NativeTypes$Animate, author$project$NativeTypes$ViewBox, author$project$NativeTypes$Width, author$project$NativeTypes$Height, author$project$NativeTypes$Fill, author$project$NativeTypes$Points, author$project$NativeTypes$R, author$project$NativeTypes$Cx, author$project$NativeTypes$Cy, author$project$NativeTypes$X, author$project$NativeTypes$Y, author$project$NativeTypes$FillOpacity, author$project$NativeTypes$Begin, author$project$NativeTypes$AttributeName, author$project$NativeTypes$Dur, author$project$NativeTypes$To, author$project$NativeTypes$RepeatCount, author$project$NativeTypes$Values]);
-var author$project$TreeItemFromNodeModel$UpdateContent = function (a) {
-	return {$: 'UpdateContent', a: a};
-};
-var author$project$TreeItemFromNodeModel$UpdateName = function (a) {
-	return {$: 'UpdateName', a: a};
-};
-var elm$html$Html$option = _VirtualDom_node('option');
-var elm$json$Json$Encode$bool = _Json_wrap;
-var elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$bool(bool));
-	});
-var elm$html$Html$Attributes$selected = elm$html$Html$Attributes$boolProperty('selected');
-var author$project$TreeItemFromNodeModel$optionFromNative = F2(
-	function (selected, _native) {
-		var str = author$project$NativeTypes$nativeToString(_native);
-		return A2(
-			elm$html$Html$option,
-			_List_fromArray(
-				[
-					elm$html$Html$Attributes$value(str),
-					elm$html$Html$Attributes$selected(
-					_Utils_eq(selected, _native))
-				]),
-			_List_fromArray(
-				[
-					elm$html$Html$text(str)
-				]));
-	});
-var elm$html$Html$input = _VirtualDom_node('input');
-var elm$html$Html$label = _VirtualDom_node('label');
-var elm$html$Html$select = _VirtualDom_node('select');
-var elm$html$Html$span = _VirtualDom_node('span');
-var author$project$TreeItemFromNodeModel$view = function (model) {
-	if (model.$ === 'Nothing') {
-		return A2(
-			elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					elm$html$Html$text('No item found')
-				]));
-	} else {
-		var item = model.a;
-		return A2(
-			elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							elm$html$Html$label,
-							_List_Nil,
-							_List_fromArray(
-								[
-									elm$html$Html$text('uuid')
-								])),
-							A2(
-							elm$html$Html$span,
-							_List_Nil,
-							_List_fromArray(
-								[
-									elm$html$Html$text(
-									danyx23$elm_uuid$Uuid$toString(item.uuid))
-								]))
-						])),
-					A2(
-					elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							elm$html$Html$label,
-							_List_Nil,
-							_List_fromArray(
-								[
-									elm$html$Html$text('name')
-								])),
-							A2(
-							elm$html$Html$input,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$value(item.name),
-									elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateName)
-								]),
-							_List_Nil),
-							elm$html$Html$text(item.name)
-						])),
-					A2(
-					elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							elm$html$Html$label,
-							_List_Nil,
-							_List_fromArray(
-								[
-									elm$html$Html$text('content')
-								])),
-							A2(
-							elm$html$Html$select,
-							_List_fromArray(
-								[
-									elm$html$Html$Events$onInput(author$project$TreeItemFromNodeModel$UpdateContent)
-								]),
-							A2(
-								elm$core$List$map,
-								author$project$TreeItemFromNodeModel$optionFromNative(item.content),
-								author$project$NativeTypes$natives)),
-							elm$html$Html$text(
-							author$project$NativeTypes$nativeToString(item.content))
-						]))
-				]));
-	}
-};
-var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
-var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -7045,7 +7456,11 @@ var author$project$Main$view = function (model) {
 				A2(
 				elm$html$Html$map,
 				author$project$MsgRouter$TreeItemTestMsg,
-				author$project$TreeItemFromNodeModel$view(model.treeItemTest))
+				author$project$MaybeTreeItemFromNodeModel$view(model.treeItemTest)),
+				A2(
+				elm$html$Html$map,
+				author$project$MsgRouter$Tree,
+				author$project$RoseTreeDisplay$maybeViewHelper(model.graphModel.maybeTree))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

@@ -1,4 +1,4 @@
-module TreeItemFromNodeModel exposing (..)
+module MaybeTreeItemFromNodeModel exposing (..)
 
 import GraphToRosetree
 import GraphInitialValues
@@ -11,12 +11,31 @@ import Html exposing (Html, div, button, label, text, input, textarea, span, sel
 import Html.Attributes exposing (style, class, value, selected)
 import Html.Events exposing (onInput, onClick)
 
-type alias Model = GraphToRosetree.TreeItemFromNode
+type alias Model = Maybe GraphToRosetree.TreeItemFromNode
 
 type Msg = UpdateName String | UpdateContent String
 
+init: Model
+init = 
+  let 
+    maybeUuid = Uuid.fromString "74b662d2-a0dc-4e64-9c3e-df54c4c052e8"
+  in
+    case maybeUuid of 
+      Nothing ->
+        Nothing
+      Just uuid ->
+        Just {
+          uuid = uuid
+        , name = "test tree item"
+        , content = Svg -- imported from NativeTypes
+        }
+
 view: Model -> Html Msg
-view item = 
+view model = 
+  case model of
+    Nothing ->
+      div [] [text "No item found"]
+    Just item ->
       div 
         [] 
         [
@@ -76,11 +95,15 @@ optionFromNative selected native =
       ]
 
 update: Msg -> Model -> ( Model, Cmd Msg )
-update msg treeItem =
-  case msg of 
-    UpdateContent contentStr ->
-      ( {treeItem | content = NativeTypes.stringToNative contentStr} , Cmd.none)
-      -- (Just treeItem , Cmd.none)
-    UpdateName name ->
-      ( { treeItem | name = name } , Cmd.none)
+update msg model =
+  case model of 
+    Nothing ->
+      (model, Cmd.none)
+    Just treeItem ->
+      case msg of 
+        UpdateContent contentStr ->
+          (Just {treeItem | content = NativeTypes.stringToNative contentStr} , Cmd.none)
+          -- (Just treeItem , Cmd.none)
+        UpdateName name ->
+          (Just { treeItem | name = name } , Cmd.none)
 

@@ -6,14 +6,15 @@ import UuidGenerator exposing(Msg(..))
 import Html
 import Maybe
 import GraphModel
-import TreeItemFromNodeModel
+import MaybeTreeItemFromNodeModel
+import RoseTreeDisplay
 
 type alias Model = 
   { svgPolygonModel1 : SvgPolygon.Model
   , svgPolygonModel2 : SvgPolygon.Model 
   , uuidGeneratorModel : UuidGenerator.Model
   , graphModel: GraphModel.Model
-  , treeItemTest: TreeItemFromNodeModel.Model
+  , treeItemTest: MaybeTreeItemFromNodeModel.Model
   }
 
 type alias MaybeModel = 
@@ -23,7 +24,8 @@ type Msg
   = SvgPolygonMsg Int SvgPolygon.Msg
   | UuidGeneratorMsg UuidGenerator.Msg
   | GraphModelMsg GraphModel.Msg
-  | TreeItemTestMsg TreeItemFromNodeModel.Msg
+  | TreeItemTestMsg MaybeTreeItemFromNodeModel.Msg
+  | Tree RoseTreeDisplay.Msg
 
 reconstructMainMsg: Msg -> Model -> (MaybeModel, Msg)
 reconstructMainMsg msg model = 

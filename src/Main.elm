@@ -30,7 +30,9 @@ import Json.Encode
 import GraphModel
 import GraphToRosetree
 import IdRoseTreeDisplay
-import TreeItemFromNodeModel
+import MaybeTreeItemFromNodeModel
+
+import RoseTreeDisplay
 
 
 main = Browser.element
@@ -52,7 +54,7 @@ init seedUuid =
         , svgPolygonModel2 = svgPolygonModel2  
         , uuidGeneratorModel = uuidGeneratorModel
         , graphModel = GraphModel.init
-        , treeItemTest = TreeItemFromNodeModel.init
+        , treeItemTest = MaybeTreeItemFromNodeModel.init
         }
       , Cmd.batch 
         [ Cmd.map (SvgPolygonMsg 1) svgPolygonCommand1
@@ -72,7 +74,8 @@ view model =
     , Html.map (SvgPolygonMsg 2) (SvgPolygon.view model.svgPolygonModel2)
     -- , ViewJson.view ( Json.Encode.encode 2  (GraphTypesToJson.nodesAndConnectionsToJson GraphInitialValues.nodesAndConnections))--("1234")
     , Html.map GraphModelMsg (GraphModel.view model.graphModel )
-    , Html.map TreeItemTestMsg (TreeItemFromNodeModel.view model.treeItemTest)    
+    , Html.map TreeItemTestMsg (MaybeTreeItemFromNodeModel.view model.treeItemTest)
+    , Html.map Tree (RoseTreeDisplay.maybeViewHelper model.graphModel.maybeTree)   
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,8 +108,20 @@ update preMsg model =
         let (graphModel, graphModelCommand) = GraphModel.update graphModelMsg model.graphModel
         in ( { model | graphModel = graphModel }, Cmd.map GraphModelMsg graphModelCommand)
       TreeItemTestMsg treeItemFromNodeModelMsg ->
-        let (treeItemTest, treeItemTestCommand)= TreeItemFromNodeModel.update treeItemFromNodeModelMsg model.treeItemTest
+        let (treeItemTest, treeItemTestCommand)= MaybeTreeItemFromNodeModel.update treeItemFromNodeModelMsg model.treeItemTest
         in ( { model | treeItemTest = treeItemTest }, Cmd.map TreeItemTestMsg treeItemTestCommand)
+      Tree roseTreeDisplayMsg ->
+        case model.graphModel.maybeTree of
+          Nothing ->
+            (model, Cmd.none)
+          Just tree ->
+            let 
+              (treeModel, roseTreeCommand)= RoseTreeDisplay.update roseTreeDisplayMsg tree
+              graphModel = model.graphModel
+            in 
+              ( { model | graphModel = { graphModel | maybeTree = Just treeModel} }, Cmd.map Tree roseTreeCommand)
+      -- _ ->
+      --   (model, Cmd.none)
 
 
 subscriptions : Model -> Sub Msg

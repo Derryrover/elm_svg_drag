@@ -6,6 +6,8 @@ import GraphInitialValues
 import GraphTypesFromJson exposing(jsonNodesAndConnectionsDecode)
 import Json.Encode
 import Json.Decode
+import RoseTreeDisplay
+import GraphToRosetree
 
 import Html exposing (Html, div, button, text, input, textarea)
 import Html.Attributes exposing (style, class,value)
@@ -15,6 +17,7 @@ type alias Model =
   { 
     data: NodesAndConnections
   , jsonString: String
+  , maybeTree: Maybe RoseTreeDisplay.Model
   }
 
 
@@ -25,6 +28,7 @@ init =
   { 
     data = GraphInitialValues.nodesAndConnections
   , jsonString = Json.Encode.encode 2 (GraphTypesToJson.nodesAndConnectionsToJson GraphInitialValues.nodesAndConnections)
+  , maybeTree = GraphToRosetree.graphToTree GraphInitialValues.nodesAndConnections
   }
 
 view: Model -> Html Msg
