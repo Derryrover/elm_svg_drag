@@ -108,8 +108,19 @@ update msg model =
             (Tree.tree treeLabel newChildren, Cmd.batch newCmd)
         else 
           (model, Cmd.none)
-      _ ->
-        (model, Cmd.none)
+      NewNode existingUuid maybeNewUuid ->  
+        if existingUuid /= uuid then
+          (model, Cmd.none)
+        else 
+          case maybeNewUuid of
+            Nothing ->
+              (model, Cmd.none)
+            Just newUuid ->
+              let 
+                newTree = GraphToRosetree.initTreeFromUuid newUuid
+                newTreeAdded = Tree.appendChild newTree model
+              in
+                (model, Cmd.none)
 
 
   

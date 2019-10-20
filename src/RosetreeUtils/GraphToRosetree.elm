@@ -16,6 +16,19 @@ type alias TreeItemFromNode =
 
 type alias TreeFromNodes = Tree TreeItemFromNode
 
+initTreeFromUuid: Uuid.Uuid -> TreeFromNodes
+initTreeFromUuid uuid = 
+  let
+    item = 
+      {
+        uuid = uuid
+      , name = ""
+      , content = Polygon
+      }
+  in
+    Tree.singleton item
+  
+
 -- TODO find root based on node that has no connections to it
 getRoot: NodesAndConnections -> Maybe Node
 getRoot nodesAndConnections = 

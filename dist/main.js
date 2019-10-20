@@ -6274,6 +6274,13 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 					msg);
 		}
 	});
+var zwilias$elm_rosetree$Tree$singleton = function (v) {
+	return A2(zwilias$elm_rosetree$Tree$Tree, v, _List_Nil);
+};
+var author$project$GraphToRosetree$initTreeFromUuid = function (uuid) {
+	var item = {content: author$project$NativeTypes$Polygon, name: '', uuid: uuid};
+	return zwilias$elm_rosetree$Tree$singleton(item);
+};
 var author$project$RoseTreeDisplay$ItemMsg = F2(
 	function (a, b) {
 		return {$: 'ItemMsg', a: a, b: b};
@@ -6297,6 +6304,19 @@ var author$project$TreeItemFromNodeModel$update = F2(
 					{name: name}),
 				elm$core$Platform$Cmd$none);
 		}
+	});
+var elm$core$Basics$neq = _Utils_notEqual;
+var zwilias$elm_rosetree$Tree$appendChild = F2(
+	function (c, _n0) {
+		var v = _n0.a;
+		var cs = _n0.b;
+		return A2(
+			zwilias$elm_rosetree$Tree$Tree,
+			v,
+			_Utils_ap(
+				cs,
+				_List_fromArray(
+					[c])));
 	});
 var zwilias$elm_rosetree$Tree$children = function (_n0) {
 	var c = _n0.b;
@@ -6359,7 +6379,20 @@ var author$project$RoseTreeDisplay$update = F2(
 					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 				}
 			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				var existingUuid = msg.a;
+				var maybeNewUuid = msg.b;
+				if (!_Utils_eq(existingUuid, uuid)) {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				} else {
+					if (maybeNewUuid.$ === 'Nothing') {
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+					} else {
+						var newUuid = maybeNewUuid.a;
+						var newTree = author$project$GraphToRosetree$initTreeFromUuid(newUuid);
+						var newTreeAdded = A2(zwilias$elm_rosetree$Tree$appendChild, newTree, model);
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+					}
+				}
 		}
 	});
 var author$project$SvgPolygon$GetSvg = function (a) {
