@@ -13,7 +13,9 @@ import Html.Events exposing (onInput, onClick)
 
 type alias Model = GraphToRosetree.TreeItemFromNode
 
-type Msg = UpdateName String | UpdateContent String
+type Msg = 
+    UpdateName String 
+  | UpdateContent String
 
 view: Model -> Html Msg
 view item = 

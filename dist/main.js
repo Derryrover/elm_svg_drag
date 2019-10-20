@@ -5757,6 +5757,14 @@ var author$project$MsgRouter$Tree = function (a) {
 var author$project$MsgRouter$TreeItemTestMsg = function (a) {
 	return {$: 'TreeItemTestMsg', a: a};
 };
+var author$project$RoseTreeDisplay$Direction = F2(
+	function (a, b) {
+		return {$: 'Direction', a: a, b: b};
+	});
+var author$project$RoseTreeDisplay$NewNode = F2(
+	function (a, b) {
+		return {$: 'NewNode', a: a, b: b};
+	});
 var author$project$UuidGenerator$NewUuid = {$: 'NewUuid'};
 var elm$core$Bitwise$and = _Bitwise_and;
 var elm$random$Random$Generator = function (a) {
@@ -6183,14 +6191,28 @@ var author$project$UuidGenerator$update = F2(
 				}),
 			elm$core$Platform$Cmd$none);
 	});
-var author$project$MsgRouter$reconstructMainMsg = F2(
+var author$project$MsgRouter$roseTreeDisplayRecursiveHelper = F2(
 	function (msg, model) {
-		if (msg.$ === 'SvgPolygonMsg') {
-			var id = msg.a;
-			var svgPolygonMsg = msg.b;
-			if (svgPolygonMsg.$ === 'Uuid') {
-				var maybeUuid = svgPolygonMsg.a;
-				if (maybeUuid.$ === 'Just') {
+		switch (msg.$) {
+			case 'ItemMsg':
+				var existingUuid = msg.a;
+				var itemMsg = msg.b;
+				return _Utils_Tuple2(
+					{uuidGeneratorModel: elm$core$Maybe$Nothing},
+					msg);
+			case 'Direction':
+				var existingUuid = msg.a;
+				var nestedTreeDisplayMsgs = msg.b;
+				var _n1 = A2(author$project$MsgRouter$roseTreeDisplayRecursiveHelper, nestedTreeDisplayMsgs, model);
+				var maybeModel = _n1.a;
+				var newMsg = _n1.b;
+				return _Utils_Tuple2(
+					maybeModel,
+					A2(author$project$RoseTreeDisplay$Direction, existingUuid, newMsg));
+			default:
+				var existingUuid = msg.a;
+				var maybeNewUuid = msg.b;
+				if (maybeNewUuid.$ === 'Just') {
 					return _Utils_Tuple2(
 						{uuidGeneratorModel: elm$core$Maybe$Nothing},
 						msg);
@@ -6203,20 +6225,53 @@ var author$project$MsgRouter$reconstructMainMsg = F2(
 						{
 							uuidGeneratorModel: elm$core$Maybe$Just(newUuidModel)
 						},
-						A2(
-							author$project$MsgRouter$SvgPolygonMsg,
-							id,
-							author$project$SvgPolygon$Uuid(newUuid)));
+						A2(author$project$RoseTreeDisplay$NewNode, existingUuid, newUuid));
 				}
-			} else {
+		}
+	});
+var author$project$MsgRouter$reconstructMainMsg = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'SvgPolygonMsg':
+				var id = msg.a;
+				var svgPolygonMsg = msg.b;
+				if (svgPolygonMsg.$ === 'Uuid') {
+					var maybeUuid = svgPolygonMsg.a;
+					if (maybeUuid.$ === 'Just') {
+						return _Utils_Tuple2(
+							{uuidGeneratorModel: elm$core$Maybe$Nothing},
+							msg);
+					} else {
+						var _n3 = A2(author$project$UuidGenerator$update, author$project$UuidGenerator$NewUuid, model.uuidGeneratorModel);
+						var newUuidModel = _n3.a;
+						var newUuidCmd = _n3.b;
+						var newUuid = newUuidModel.currentUuid;
+						return _Utils_Tuple2(
+							{
+								uuidGeneratorModel: elm$core$Maybe$Just(newUuidModel)
+							},
+							A2(
+								author$project$MsgRouter$SvgPolygonMsg,
+								id,
+								author$project$SvgPolygon$Uuid(newUuid)));
+					}
+				} else {
+					return _Utils_Tuple2(
+						{uuidGeneratorModel: elm$core$Maybe$Nothing},
+						msg);
+				}
+			case 'Tree':
+				var roseTreeDisplayMsg = msg.a;
+				var _n4 = A2(author$project$MsgRouter$roseTreeDisplayRecursiveHelper, roseTreeDisplayMsg, model);
+				var maybeUuidModel = _n4.a;
+				var newMsg = _n4.b;
+				return _Utils_Tuple2(
+					maybeUuidModel,
+					author$project$MsgRouter$Tree(newMsg));
+			default:
 				return _Utils_Tuple2(
 					{uuidGeneratorModel: elm$core$Maybe$Nothing},
 					msg);
-			}
-		} else {
-			return _Utils_Tuple2(
-				{uuidGeneratorModel: elm$core$Maybe$Nothing},
-				msg);
 		}
 	});
 var author$project$RoseTreeDisplay$ItemMsg = F2(
@@ -6256,52 +6311,55 @@ var author$project$RoseTreeDisplay$update = F2(
 		var treeLabel = zwilias$elm_rosetree$Tree$label(model);
 		var uuid = treeLabel.uuid;
 		var children = zwilias$elm_rosetree$Tree$children(model);
-		if (msg.$ === 'ItemMsg') {
-			var uuidMsg = msg.a;
-			var treeItemMsg = msg.b;
-			if (_Utils_eq(uuidMsg, uuid)) {
-				var _n1 = A2(author$project$TreeItemFromNodeModel$update, treeItemMsg, treeLabel);
-				var newTreeItem = _n1.a;
-				var cmd = _n1.b;
-				return _Utils_Tuple2(
-					A2(zwilias$elm_rosetree$Tree$tree, newTreeItem, children),
-					A2(
-						elm$core$Platform$Cmd$map,
-						author$project$RoseTreeDisplay$ItemMsg(uuid),
-						cmd));
-			} else {
+		switch (msg.$) {
+			case 'ItemMsg':
+				var uuidMsg = msg.a;
+				var treeItemMsg = msg.b;
+				if (_Utils_eq(uuidMsg, uuid)) {
+					var _n1 = A2(author$project$TreeItemFromNodeModel$update, treeItemMsg, treeLabel);
+					var newTreeItem = _n1.a;
+					var cmd = _n1.b;
+					return _Utils_Tuple2(
+						A2(zwilias$elm_rosetree$Tree$tree, newTreeItem, children),
+						A2(
+							elm$core$Platform$Cmd$map,
+							author$project$RoseTreeDisplay$ItemMsg(uuid),
+							cmd));
+				} else {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
+			case 'Direction':
+				var uuidMsg = msg.a;
+				var newMsg = msg.b;
+				if (_Utils_eq(uuidMsg, uuid)) {
+					var listChildrenAndCmd = A2(
+						elm$core$List$map,
+						author$project$RoseTreeDisplay$update(newMsg),
+						children);
+					var newChildren = A2(
+						elm$core$List$map,
+						function (_n3) {
+							var child = _n3.a;
+							var cmd = _n3.b;
+							return child;
+						},
+						listChildrenAndCmd);
+					var newCmd = A2(
+						elm$core$List$map,
+						function (_n2) {
+							var child = _n2.a;
+							var cmd = _n2.b;
+							return cmd;
+						},
+						listChildrenAndCmd);
+					return _Utils_Tuple2(
+						A2(zwilias$elm_rosetree$Tree$tree, treeLabel, newChildren),
+						elm$core$Platform$Cmd$batch(newCmd));
+				} else {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
+			default:
 				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			}
-		} else {
-			var uuidMsg = msg.a;
-			var newMsg = msg.b;
-			if (_Utils_eq(uuidMsg, uuid)) {
-				var listChildrenAndCmd = A2(
-					elm$core$List$map,
-					author$project$RoseTreeDisplay$update(newMsg),
-					children);
-				var newChildren = A2(
-					elm$core$List$map,
-					function (_n3) {
-						var child = _n3.a;
-						var cmd = _n3.b;
-						return child;
-					},
-					listChildrenAndCmd);
-				var newCmd = A2(
-					elm$core$List$map,
-					function (_n2) {
-						var child = _n2.a;
-						var cmd = _n2.b;
-						return cmd;
-					},
-					listChildrenAndCmd);
-				return _Utils_Tuple2(
-					A2(zwilias$elm_rosetree$Tree$tree, treeLabel, newChildren),
-					elm$core$Platform$Cmd$batch(newCmd));
-			} else {
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			}
 		}
 	});
 var author$project$SvgPolygon$GetSvg = function (a) {
@@ -6929,10 +6987,6 @@ var author$project$MaybeTreeItemFromNodeModel$view = function (model) {
 				]));
 	}
 };
-var author$project$RoseTreeDisplay$Direction = F2(
-	function (a, b) {
-		return {$: 'Direction', a: a, b: b};
-	});
 var author$project$ElmStyle$elmClass = 'elm_class';
 var author$project$RoseTreeDisplay$getListItemClassNames = function (depth) {
 	return 'depth_rosetree_' + (elm$core$String$fromInt(depth) + (' li_rosetree ' + author$project$ElmStyle$elmClass));
@@ -7070,6 +7124,17 @@ var author$project$RoseTreeDisplay$recursiveView = F2(
 							elm$html$Html$map,
 							author$project$RoseTreeDisplay$ItemMsg(uuid),
 							author$project$TreeItemFromNodeModel$view(treeLabel))
+						])),
+					A2(
+					elm$html$Html$button,
+					_List_fromArray(
+						[
+							elm$html$Html$Events$onClick(
+							A2(author$project$RoseTreeDisplay$NewNode, uuid, elm$core$Maybe$Nothing))
+						]),
+					_List_fromArray(
+						[
+							elm$html$Html$text('+ make new node')
 						])),
 					A2(
 					elm$html$Html$ol,

@@ -21,7 +21,7 @@ import List exposing(map)
 import Maybe exposing(..)
 import Html exposing (Html, ol, li, div, span, hr, text, node, button, select, option)
 import Html.Attributes exposing (..)
-import Html.Events exposing(onInput)
+import Html.Events exposing(onInput, onClick)
 import GraphToRosetree
 import TreeItemFromNodeModel
 import Uuid
@@ -32,6 +32,7 @@ type alias Model = GraphToRosetree.TreeFromNodes
 type Msg 
   = ItemMsg Uuid.Uuid TreeItemFromNodeModel.Msg 
   | Direction Uuid.Uuid Msg
+  | NewNode Uuid.Uuid (Maybe Uuid.Uuid)
 
 -- The view function of my rosetree is simple but awefully concoluted
 -- this is mostly and html crap branching
@@ -75,6 +76,7 @@ recursiveView  depth treeModel =
                 (ItemMsg uuid)
                 (TreeItemFromNodeModel.view (treeLabel))
               ] 
+        , button [onClick (NewNode uuid Nothing )] [text "+ make new node"]
         , ol 
           [class (getOrderedListClassNames depth)] 
             (List.map (\child -> Html.map (Direction uuid) (recursiveView (depth+1) child )) children) 
@@ -106,9 +108,8 @@ update msg model =
             (Tree.tree treeLabel newChildren, Cmd.batch newCmd)
         else 
           (model, Cmd.none)
-
-
-  --(model, Cmd.none)
+      _ ->
+        (model, Cmd.none)
 
 
   
